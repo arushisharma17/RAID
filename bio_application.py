@@ -40,7 +40,7 @@ def extract_tokens_with_bio(node, label=None) -> Tuple[List[str], List[str]]:
             if node.is_named:
                 recurse(child, node.type, s)
             else:
-                recurse(child, current_label, s)
+                recurse(child, current_label, s)  # not usually what it does
 
     recurse(node, label, 0)
     return tokens, bio_labels
@@ -57,6 +57,12 @@ def main():
         public static void main(String[] args) {
             System.out.println("Hello, World!");
         }
+    }
+    '''
+
+    source_code = b'''
+    for (int i = 0; i < 10; i++) {
+        System.out.println(i);
     }
     '''
 
