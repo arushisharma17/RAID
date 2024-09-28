@@ -23,7 +23,7 @@ def extract_tokens_with_bio(node, label=None) -> Tuple[List[str], List[str]]:
     tokens = []
     bio_labels = []
 
-    def recurse(node, current_label, space=0):
+    def recurse(node, current_label, depth=0):
         if node.is_named:
             token_text = node.text.decode('utf-8')
             token_list = re.findall(r'\w+|[^\s\w]', token_text)  # Splits into words and symbols
@@ -31,16 +31,15 @@ def extract_tokens_with_bio(node, label=None) -> Tuple[List[str], List[str]]:
             for i, token in enumerate(token_list):
                 tokens.append(token)
                 if i == 0:
-                    bio_labels.append(f"{space}-B-{current_label}" if current_label else f"{space}-O")
+                    bio_labels.append(f"{depth}-B-{current_label}" if current_label else f"{depth}-O")
                 else:
-                    bio_labels.append(f"{space}-I-{current_label}" if current_label else f"{space}-O")
+                    bio_labels.append(f"{depth}-I-{current_label}" if current_label else f"{depth}-O")
 
         for child in node.children:
-            s = space + 1
             if node.is_named:
-                recurse(child, node.type, s)
+                recurse(child, node.type, depth + 1)
             else:
-                recurse(child, current_label, s)  # not usually what it does
+                recurse(child, current_label, depth)  # not usually what it does
 
     recurse(node, label, 0)
     return tokens, bio_labels
