@@ -7,16 +7,17 @@ import pandas as pd
 import graphviz
 
 
-def get_leaf_nodes(node):
-    leaf_nodes = []
+def get_nodes_at_level(node, target_level, current_level=0):
+    nodes_at_level = []
 
-    if len(node.children) == 0:
-        leaf_nodes.append(node)
+    # if level is beyond tree, appends the leaf
+    if current_level == target_level or node.child_count == 0:
+        nodes_at_level.append(node)
+    else:
+        for child in node.children:
+            nodes_at_level.extend(get_nodes_at_level(child, target_level, current_level + 1))
 
-    for child in node.children:
-        leaf_nodes.extend(get_leaf_nodes(child))
-
-    return leaf_nodes
+    return nodes_at_level
 
 
 def find_bio_label_type(l):
@@ -28,16 +29,15 @@ def find_bio_label_type(l):
 def bio_label_str(source_code, language):
     # Load Tree-sitter Java language
     if language == 'java':
-        JAVA_LANGUAGE = Language(tsjava.language())
-        parser = Parser(JAVA_LANGUAGE)
+        code_language = Language(tsjava.language())
     else:
-        PYTHON_LANGUAGE = Language(tspython.language())
-        parser = Parser(PYTHON_LANGUAGE)
+        code_language = Language(tspython.language())
+    parser = Parser(code_language)
 
     # Parse the source code
     tree = parser.parse(source_code)
     root_node = tree.root_node
-    leaf_nodes = get_leaf_nodes(root_node)
+    leaf_nodes = get_nodes_at_level(root_node, 5)
     bio = []
     prev = None
     o_type = None
