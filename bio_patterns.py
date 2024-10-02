@@ -59,10 +59,19 @@ def bio_label_str(source_code, language):
             prev = name
             o_type = None
 
-    print('{0:11}  {1}'.format('TOKEN', 'LABEL'))
+    token_data = []
+    label_data = []
     for element in bio:
-        split_element = element.split(':')
-        print('{0:10}  {1}'.format(split_element[0], split_element[1]))
+        split_element = element.split(": ")
+        token_data.append(split_element[0])
+        label_data.append(split_element[1])
+
+    data = {"TOKEN": token_data,
+            "LABEL": label_data}
+
+    df = pd.DataFrame(data)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(df)
 
 
 def main():
