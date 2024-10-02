@@ -7,7 +7,8 @@ import pandas as pd
 
 cases = {
     'single_letter': '^[a-zA-Z]$',
-    'camel_case': '^[a-z]+([A-Z][a-z]+)+$',
+    'camel_case': '^[a-z][a-z]*(?:[A-Z][a-z0-9]+)*[a-zA-Z]?$',
+    'pascal_case': '^([A-Z][a-z]+)*[A-Z][a-z]*$',
     'snake_case': '^[a-z]+(_[a-z]+)*$',
     'screaming_snake_case': '^[A-Z]+(_[A-Z]+)*$',
     'prefix': '^(get|set)[A-Za-z]+$',
