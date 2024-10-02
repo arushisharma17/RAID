@@ -80,8 +80,11 @@ def extract_bio_labels_from_source_code(source_code, language, depth=-1):
     """
     if language == 'java':
         code_language = Language(tsjava.language())
-    else:
+    elif language == 'python':
         code_language = Language(tspython.language())
+    else:
+        print("Please pick Java or Python as a language.")
+        return
     parser = Parser(code_language)
 
     tree = parser.parse(source_code)
