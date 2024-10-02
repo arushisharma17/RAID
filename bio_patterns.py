@@ -1,32 +1,62 @@
-import re
-from typing import List, Tuple
-from tree_sitter import Language, Parser
+from typing import List
+
+from tree_sitter import Language, Parser, Node
 import tree_sitter_java as tsjava
 import tree_sitter_python as tspython
 import pandas as pd
-import graphviz
 
 
-def get_nodes_at_level(node, target_level=-1, current_level=0):
-    nodes_at_level = []
+def get_nodes_at_level(node, target_level) -> List[Node]:
+    """
+    Extracts nodes at a given number of levels down.
 
-    # if level is beyond tree, appends the leaf
-    if current_level == target_level or node.child_count == 0:
-        nodes_at_level.append(node)
-    else:
-        for child in node.children:
-            nodes_at_level.extend(get_nodes_at_level(child, target_level, current_level + 1))
+    Parameters
+    ----------
+    node : tree_sitter.Node
+        The root node of the AST.
+    target_level : int
+        The desired depth to retrieve.
 
-    return nodes_at_level
+    Returns
+    -------
+    List[Node]
+        A list of knows at the target level down.
+    """
+
+    def retrieve_nodes(node, target_level, current_level=0):
+        nodes_at_level = []
+
+        # if level is beyond tree, appends the leaf
+        if current_level == target_level or node.child_count == 0:
+            nodes_at_level.append(node)
+        else:
+            for child in node.children:
+                nodes_at_level.extend(retrieve_nodes(child, target_level, current_level + 1))
+
+        return nodes_at_level
+
+    return retrieve_nodes(node, target_level)
 
 
-def find_bio_label_type(l):
-    if (l.type == str(l.text)[2:-1] or l.type == 'identifier') and l.parent is not None:
-        return l.parent.type
-    return l.type
+def find_bio_label_type(node) -> str:
+    if (node.type == str(node.text)[2:-1] or node.type == 'identifier') and node.parent is not None:
+        return node.parent.type
+    return node.type
 
 
-def bio_label_str(source_code, language):
+def extract_bio_labels_from_source_code(source_code, language, depth=-1):
+    """
+    Parses the source code, then generates and displays the separate tokens and labels
+
+    Parameters
+    ----------
+    source_code : bytes
+        The code snippet to be parsed.
+    language : str
+        The language in which the code snippet should be parsed.
+    depth : int, optional
+        The desired depth to retrieve from the tree; the default value retrieves leaf nodes.
+    """
     # Load Tree-sitter Java language
     if language == 'java':
         code_language = Language(tsjava.language())
@@ -37,14 +67,13 @@ def bio_label_str(source_code, language):
     # Parse the source code
     tree = parser.parse(source_code)
     root_node = tree.root_node
-    leaf_nodes = get_nodes_at_level(root_node)
+    leaf_nodes = get_nodes_at_level(root_node, depth)
     bio = []
     prev = None
     o_type = None
     for i, l in enumerate(leaf_nodes):
         name = find_bio_label_type(l)
         leaf_text = str(l.text)[2:-1]
-        # print("Leaf:", leaf_text, "\tName:", name, "\tType:", l.type, "\tParent Type:", l.parent.type, "Prev:", prev)
         if l.type == leaf_text and i > 0 and (prev != name or o_type is None):
             if ((language == 'python' and l.parent.child_count == 2)
                     or (language == 'java' and l.parent.child_count == 3 and l.parent.child(2).type == ';')):
@@ -104,7 +133,7 @@ def main():
     }
     '''
 
-    bio_label_str(source_code, 'java')
+    extract_bio_labels_from_source_code(source_code, 'java')
 
 
 if __name__ == "__main__":
