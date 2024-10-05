@@ -129,16 +129,19 @@ def extract_bio_labels_from_source_code(source_code, language, depth=-1):
     df = pd.DataFrame(data)
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(df)
+    print('\n')
+
+    return token_data, label_data, leaf_labels
 
 
 def main():
-    # source_code = b'''
-    # public class HelloWorld {
-    #     public static void main(String[] args) {
-    #         System.out.println("Hello, World!");
-    #     }
-    # }
-    # '''
+    source_code = b'''
+    public class HelloWorld {
+        public static void main(String[] args) {
+            System.out.println("Hello, World!");
+        }
+    }
+    '''
 
     # source_code = b'''
     # for (int i = 0; i < 10; i++) {
@@ -155,11 +158,11 @@ def main():
     # # Comment about function
     # '''
 
-    source_code = b'''
-    public int addNumbers(a, b) {
-        return a + b;
-    }
-    '''
+    # source_code = b'''
+    # public int addNumbers(a, b) {
+    #     return a + b;
+    # }
+    # '''
 
     extract_bio_labels_from_source_code(source_code, 'java')
 
