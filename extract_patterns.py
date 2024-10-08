@@ -25,7 +25,7 @@ def find_label_with_regex(token):
     for key in cases:
         if check_token(token, key):
             return key
-    return 'N/A'
+    return 'O'
 
 
 def get_nodes_at_level(node, target_level) -> List[Node]:
@@ -61,8 +61,6 @@ def get_nodes_at_level(node, target_level) -> List[Node]:
 
 
 def find_bio_label_type(node) -> str:
-    if (node.type == str(node.text)[2:-1] or node.type == 'identifier') and node.parent is not None:
-        return node.parent.type
     return node.type
 
 
@@ -99,7 +97,7 @@ def extract_bio_labels_from_source_code(source_code, language, depth=-1):
     for i, node in enumerate(leaf_nodes):
         name = find_bio_label_type(node)
         leaf_text = str(node.text)[2:-1]
-        leaf_labels.append(find_label_with_regex(leaf_text) if node.type == 'identifier' else 'N/A')
+        leaf_labels.append(find_label_with_regex(leaf_text) if node.type == 'identifier' else 'O')
 
         if node.type == leaf_text and i > 0 and (prev != name or o_type is None):
             if ((language == 'python' and node.parent.child_count == 2)
@@ -135,13 +133,13 @@ def extract_bio_labels_from_source_code(source_code, language, depth=-1):
 
 
 def main():
-    source_code = b'''
-    public class HelloWorld {
-        public static void main(String[] args) {
-            System.out.println("Hello, World!");
-        }
-    }
-    '''
+    # source_code = b'''
+    # public class HelloWorld {
+    #     public static void main(String[] args) {
+    #         System.out.println("Hello, World!");
+    #     }
+    # }
+    # '''
 
     # source_code = b'''
     # for (int i = 0; i < 10; i++) {
@@ -149,10 +147,10 @@ def main():
     # }
     # # '''
 
-    # source_code = b'''
-    # def add_numbers (a, b):
-    #     return a + b
-    # '''
+    source_code = b'''
+    def add_numbers (a, b):
+        return a + b
+    '''
 
     # source_code = b'''
     # # Comment about function
@@ -164,7 +162,7 @@ def main():
     # }
     # '''
 
-    extract_bio_labels_from_source_code(source_code, 'java')
+    extract_bio_labels_from_source_code(source_code, 'python')
 
 
 if __name__ == "__main__":
