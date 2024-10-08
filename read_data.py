@@ -42,6 +42,9 @@ def write_file(file_name, strings, tokens, labels):
 
 
 def generate_in_and_label_files(file_name, language):
+    if file_name[-4:] != '.txt':
+        raise Exception("Input a text file.")
+
     strings = read_file(file_name)
     file = file_name[:-4]
     with open(file + '.in', 'w') as file_in, open(file + '.label', 'w') as file_label:
