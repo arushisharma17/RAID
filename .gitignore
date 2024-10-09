@@ -10,3 +10,5 @@ htmlcov/
 docs/_build/
 *.log
 .env
+neurox-env
+NeuroX
