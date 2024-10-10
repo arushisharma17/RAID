@@ -4,10 +4,14 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
 ### Features
 1. Labels of different granularities: tokens, phrases, blocks, other semantic chunks.
 2. Corresponding activations for tokens, phrases, blocks.
-3. Support for labels using Regular expressions, Abstract Syntax Trees, Semantic datasets.
-4. Integration with Tree-sitter parsers (Abstract Syntax Tree based labels)
-5. B-I-0 Labelling for higher-level semantic concepts (Phrase and Block level chunks)
-6. Activation aggregation for higher-level semantic concepts (Phrase and Block level chunks): YOu can generate activations once and experiment with different granularities by aggregatingt the activations. 
+4. B-I-0 Labelling for higher-level semantic concepts (Phrase and Block level chunks)
+5. Activation aggregation for higher-level semantic concepts (Phrase and Block level chunks): YOu can generate activations once and experiment with different granularities by aggregatingt the activations.
+6. Integration with static analysis tools to create custom labels
+   a. Tree-sitter parsers (Abstract Syntax Tree based labels) - Syntactic
+   b. CK metrics (Object Oriented metrics/Design patterns) - Structural
+   c. CFG, DFG, AST Nesting/Parent-child relationships, etc -Hierarchical
+   d. SE datasets, Ontologies, Design Patterns - Semantic
+   e. Regular Expressions to create datasets, filter datasets, edit datasets.
    
 
 ## Link to Colab notebook for tutorial and intial instructions
