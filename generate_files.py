@@ -1,5 +1,21 @@
 from extract_patterns import extract_bio_labels_from_source_code
 
+label_types = {"::": "DOUBLECOLON", "--": "DOUBLEMINUS", "++": "DOUBLEPLUS", "false": "BOOL", "true": "BOOL",
+              "modifier": "MODIFIER", "basictype": "TYPE", "null": "IDENT", "keyword": "KEYWORD", "identifier": "IDENT",
+              "decimalinteger": "NUMBER", "decimalfloatingpoint": "NUMBER",
+              "string": "STRING", "(": "LPAR", ")": "RPAR", "[": "LSQB", "]": "RSQB", ",": "COMMA", "?": "CONDITIONOP",
+              ";": "SEMI", "+": "PLUS", "-": "MINUS", "*": "STAR", "/": "SLASH", ".": "DOT", "=": "EQUAL", ":": "COLON",
+              "|": "VBAR", "&": "AMPER", "<": "LESS", ">": "GREATER", "%": "PERCENT", "{": "LBRACE", "}": "RBRACE",
+              "==": "EQEQUAL", "!=": "NOTEQUAL", "<=": "LESSEQUAL", ">=": "GREATEREQUAL", "~": "TILDE",
+              "^": "CIRCUMFLEX",
+              "<<": "LEFTSHIFT", ">>": "RIGHTSHIFT", "**": "DOUBLESTAR", "+=": "PLUSEUQAL", "-=": "MINEQUAL",
+              "*=": "STAREQUAL",
+              "/=": "SLASHEQUAL", "%=": "PERCENTEQUAL", "&=": "AMPEREQUAL", "|=": "VBAREQUAL", "^=": "CIRCUMFLEXEQUAL",
+               "<<=": "LEFTSHIFTEQUAL", ">>=": "RIGHTSHIFTEQUAL", "**=": "DOUBLESTAREQUAL", "//": "DOUBLESLASH",
+               "//=": "DOUBLESLASHEQUAL",
+               "@": "AT", "@=": "ATEQUAL", "->": "RARROW", "...": "ELLIPSIS", ":=": "COLONEQUAL", "&&": "AND",
+               "!": "NOT", "||": "OR"}
+
 
 def read_file(file_name):
     """
@@ -25,6 +41,11 @@ def read_file(file_name):
                 st = ''
         strings.append(st)
     return strings
+
+
+def convert_label(label):
+    condensed = label_types[label.lower()]
+    return condensed if condensed else label
 
 
 def write_file(file_name, string, tokens, labels):
@@ -58,7 +79,7 @@ def write_file(file_name, string, tokens, labels):
                 count = count - 1
             for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
                 file_in.write(token + ' ')
-                file_labels.write(label + ' ')
+                file_labels.write(convert_label(label[2:]) + ' ')
             file_in.write('\n')
             file_labels.write('\n')
             prev = prev + count + 1
@@ -93,7 +114,7 @@ def generate_in_and_label_files(file_name, language):
 
 
 def main():
-    generate_in_and_label_files('code.txt', 'java')
+    generate_in_and_label_files('java_test.txt', 'java')
 
 
 if __name__ == "__main__":
