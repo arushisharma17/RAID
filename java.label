@@ -1,14 +1,14 @@
-B-modifiers O-class_declaration B-class_declaration O-class_body 
-O-modifiers O-modifiers B-void_type B-method_declaration O-formal_parameters B-type_identifier O-dimensions O-dimensions B-formal_parameter O-formal_parameters O-block 
-B-field_access O-field_access B-field_access O-method_invocation B-method_invocation O-argument_list O-string_literal B-string_fragment O-string_literal O-argument_list O-expression_statement 
-O-block 
-O-class_body 
+MODIFIER CLASS IDENT LBRACE 
+MODIFIER STATIC VOID_TYPE IDENT LPAR IDENT LSQB RSQB IDENT RPAR LBRACE 
+IDENT DOT IDENT DOT IDENT LPAR DQUOTES STRING DQUOTES RPAR SEMI 
+RBRACE 
+RBRACE 
 
-B-for_statement O-for_statement O-integral_type B-variable_declarator O-variable_declarator B-decimal_integer_literal B-local_variable_declaration B-binary_expression O-binary_expression B-decimal_integer_literal O-for_statement B-update_expression O-update_expression O-for_statement O-block 
-B-field_access O-field_access B-field_access O-method_invocation B-method_invocation O-argument_list B-argument_list O-argument_list O-expression_statement 
-O-block 
+FOR LPAR INT IDENT EQUAL DECIMAL_INTEGER_LITERAL SEMI IDENT LESS DECIMAL_INTEGER_LITERAL SEMI IDENT DOUBLEPLUS RPAR LBRACE 
+IDENT DOT IDENT DOT IDENT LPAR IDENT RPAR SEMI 
+RBRACE 
 
-B-modifiers O-integral_type B-method_declaration O-formal_parameters B-type_identifier O-ERROR B-formal_parameter O-formal_parameters O-block 
-B-return_statement B-binary_expression O-binary_expression B-binary_expression B-return_statement 
-O-block 
+MODIFIER INT IDENT LPAR IDENT COMMA IDENT RPAR LBRACE 
+RETURN IDENT PLUS IDENT SEMI 
+RBRACE 
 
