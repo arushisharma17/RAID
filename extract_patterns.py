@@ -5,131 +5,135 @@ import tree_sitter_java as tsjava
 import tree_sitter_python as tspython
 import pandas as pd
 
-cases = {
-    'single_letter': '^[a-zA-Z]$',
-    'camel_case': '^[a-z][a-z]*(?:[A-Z][a-z0-9]+)*[a-zA-Z]?$',
-    'pascal_case': '^([A-Z][a-z]+)*[A-Z][a-z]*$',
-    'snake_case': '^[a-z]+(_[a-z]+)*$',
-    'screaming_snake_case': '^[A-Z]+(_[A-Z]+)*$',
-    'prefix': '^(get|set)[A-Za-z]+$',
-    'numeric': '^[a-zA-Z].+[0-9]+$',
-}
+class PatternExtractor:
+
+    def __init__(self):
+
+        self.cases = {
+            'single_letter': '^[a-zA-Z]$',
+            'camel_case': '^[a-z][a-z]*(?:[A-Z][a-z0-9]+)*[a-zA-Z]?$',
+            'pascal_case': '^([A-Z][a-z]+)*[A-Z][a-z]*$',
+            'snake_case': '^[a-z]+(_[a-z]+)*$',
+            'screaming_snake_case': '^[A-Z]+(_[A-Z]+)*$',
+            'prefix': '^(get|set)[A-Za-z]+$',
+            'numeric': '^[a-zA-Z].+[0-9]+$',
+        }
 
 
-def check_token(token, regex):
-    pattern = cases[regex]
-    return bool(re.match(pattern, token))
+    def check_token(self, token, regex):
+        pattern = self.cases[regex]
+        return bool(re.match(pattern, token))
 
 
-def find_label_with_regex(token):
-    for key in cases:
-        if check_token(token, key):
-            return key
-    return 'O'
+    def find_label_with_regex(self, token):
+        for key in self.cases:
+            if self.check_token(token, key):
+                return key
+        return 'O'
 
 
-def get_nodes_at_level(node, target_level) -> List[Node]:
-    """
-    Extracts nodes at a given number of levels down.
+    def get_nodes_at_level(self, node, target_level) -> List[Node]:
+        """
+        Extracts nodes at a given number of levels down.
 
-    Parameters
-    ----------
-    node : tree_sitter.Node
-        The root node of the AST.
-    target_level : int
-        The desired depth to retrieve.
+        Parameters
+        ----------
+        node : tree_sitter.Node
+            The root node of the AST.
+        target_level : int
+            The desired depth to retrieve.
 
-    Returns
-    -------
-    List[Node]
-        A list of knows at the target level down.
-    """
+        Returns
+        -------
+        List[Node]
+            A list of knows at the target level down.
+        """
 
-    def retrieve_nodes(node, target_level, current_level=0):
-        nodes_at_level = []
+        def retrieve_nodes(node, target_level, current_level=0):
+            nodes_at_level = []
 
-        # if level is beyond tree, appends the leaf
-        if current_level == target_level or node.child_count == 0:
-            nodes_at_level.append(node)
-        else:
-            for child in node.children:
-                nodes_at_level.extend(retrieve_nodes(child, target_level, current_level + 1))
-
-        return nodes_at_level
-
-    return retrieve_nodes(node, target_level)
-
-
-def find_bio_label_type(node) -> str:
-    return node.grammar_name
-
-
-def extract_bio_labels_from_source_code(source_code, language, depth=-1):
-    """
-    Parses the source code, then generates and displays the separate tokens and labels
-
-    Parameters
-    ----------
-    source_code : bytes
-        The code snippet to be parsed.
-    language : str
-        The language in which the code snippet should be parsed.
-    depth : int, optional
-        The desired depth to retrieve from the tree; the default value retrieves leaf nodes.
-    """
-    if language == 'java':
-        code_language = Language(tsjava.language())
-    elif language == 'python':
-        code_language = Language(tspython.language())
-    else:
-        print("Please pick Java or Python as a language.")
-        return
-    parser = Parser(code_language)
-
-    tree = parser.parse(source_code)
-    root_node = tree.root_node
-
-    leaf_nodes = get_nodes_at_level(root_node, depth)
-    leaf_labels = []
-    bio = []
-    prev = None
-    o_type = None
-    for i, node in enumerate(leaf_nodes):
-        name = find_bio_label_type(node)
-        leaf_text = str(node.text)[2:-1]
-        leaf_labels.append(find_label_with_regex(leaf_text) if node.type == 'identifier' else 'O')
-
-        if node.type == leaf_text and i > 0 and (prev != name or o_type is None):
-            if ((language == 'python' and node.parent.child_count == 2)
-                    or (language == 'java' and node.parent.child_count == 3 and node.parent.child(2).type == ';')):
-                bio.append(leaf_text + ": B" + '-' + name)
+            # if level is beyond tree, appends the leaf
+            if current_level == target_level or node.child_count == 0:
+                nodes_at_level.append(node)
             else:
-                bio.append(leaf_text + ": O" + '-' + name)
-            prev = None
-            o_type = name
+                for child in node.children:
+                    nodes_at_level.extend(retrieve_nodes(child, target_level, current_level + 1))
+
+            return nodes_at_level
+
+        return retrieve_nodes(node, target_level)
+
+
+    def find_bio_label_type(self, node) -> str:
+        return node.grammar_name
+
+
+    def extract_bio_labels_from_source_code(self, source_code, language, depth=-1):
+        """
+        Parses the source code, then generates and displays the separate tokens and labels
+
+        Parameters
+        ----------
+        source_code : bytes
+            The code snippet to be parsed.
+        language : str
+            The language in which the code snippet should be parsed.
+        depth : int, optional
+            The desired depth to retrieve from the tree; the default value retrieves leaf nodes.
+        """
+        if language == 'java':
+            code_language = Language(tsjava.language())
+        elif language == 'python':
+            code_language = Language(tspython.language())
         else:
-            bio_type = 'B' if prev != name else 'I'
-            bio.append(leaf_text + ": " + bio_type + '-' + name)
-            prev = name
-            o_type = None
+            print("Please pick Java or Python as a language.")
+            return
+        parser = Parser(code_language)
 
-    token_data = []
-    label_data = []
-    for element in bio:
-        split_element = element.split(": ")
-        token_data.append(split_element[0])
-        label_data.append(split_element[1])
+        tree = parser.parse(source_code)
+        root_node = tree.root_node
 
-    data = {"TOKEN": token_data,
-            "LABEL": label_data,
-            "REGEX": leaf_labels}
+        leaf_nodes = self.get_nodes_at_level(root_node, depth)
+        leaf_labels = []
+        bio = []
+        prev = None
+        o_type = None
+        for i, node in enumerate(leaf_nodes):
+            name = self.find_bio_label_type(node)
+            leaf_text = str(node.text)[2:-1]
+            leaf_labels.append(self.find_label_with_regex(leaf_text) if node.type == 'identifier' else 'O')
 
-    df = pd.DataFrame(data)
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(df)
-    print('\n')
+            if node.type == leaf_text and i > 0 and (prev != name or o_type is None):
+                if ((language == 'python' and node.parent.child_count == 2)
+                        or (language == 'java' and node.parent.child_count == 3 and node.parent.child(2).type == ';')):
+                    bio.append(leaf_text + ": B" + '-' + name)
+                else:
+                    bio.append(leaf_text + ": O" + '-' + name)
+                prev = None
+                o_type = name
+            else:
+                bio_type = 'B' if prev != name else 'I'
+                bio.append(leaf_text + ": " + bio_type + '-' + name)
+                prev = name
+                o_type = None
 
-    return token_data, label_data, leaf_labels
+        token_data = []
+        label_data = []
+        for element in bio:
+            split_element = element.split(": ")
+            token_data.append(split_element[0])
+            label_data.append(split_element[1])
+
+        data = {"TOKEN": token_data,
+                "LABEL": label_data,
+                "REGEX": leaf_labels}
+
+        df = pd.DataFrame(data)
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            print(df)
+        print('\n')
+
+        return token_data, label_data, leaf_labels
 
 
 def main():
@@ -161,8 +165,8 @@ def main():
         return a + b;
     }
     '''
-
-    extract_bio_labels_from_source_code(source_code, 'java')
+    e = PatternExtractor()
+    e.extract_bio_labels_from_source_code(source_code, 'java')
 
 
 if __name__ == "__main__":
