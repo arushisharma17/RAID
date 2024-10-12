@@ -61,7 +61,7 @@ def get_nodes_at_level(node, target_level) -> List[Node]:
 
 
 def find_bio_label_type(node) -> str:
-    return node.type
+    return node.grammar_name
 
 
 def extract_bio_labels_from_source_code(source_code, language, depth=-1):
@@ -147,22 +147,22 @@ def main():
     # }
     # # '''
 
-    source_code = b'''
-    def add_numbers (a, b):
-        return a + b
-    '''
+    # source_code = b'''
+    # def add_numbers (a, b):
+    #     return a + b
+    # '''
 
     # source_code = b'''
     # # Comment about function
     # '''
 
-    # source_code = b'''
-    # public int addNumbers(a, b) {
-    #     return a + b;
-    # }
-    # '''
+    source_code = b'''
+    public int addNumbers(a, b) {
+        return a + b;
+    }
+    '''
 
-    extract_bio_labels_from_source_code(source_code, 'python')
+    extract_bio_labels_from_source_code(source_code, 'java')
 
 
 if __name__ == "__main__":
