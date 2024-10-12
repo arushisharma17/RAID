@@ -52,15 +52,16 @@ def write_file(file_name, string, tokens, labels):
                 if ti >= token_index:
                     token_index = ti
                 else:
+                    count = count - 1
                     break
-            if count == 0:
-                count = count + 1
-            for i in range(prev, count + prev):
-                file_in.write(tokens[i] + ' ')
-                file_labels.write(labels[i] + ' ')
+            if count == 1:
+                count = count - 1
+            for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
+                file_in.write(token + ' ')
+                file_labels.write(label + ' ')
             file_in.write('\n')
             file_labels.write('\n')
-            prev = prev + count if count > 1 or prev > 0 else 0
+            prev = prev + count + 1
             token_index = 0
         file_in.write('\n')
         file_labels.write('\n')
@@ -81,6 +82,7 @@ def generate_in_and_label_files(file_name, language):
         raise Exception("Input a text file.")
 
     strings = read_file(file_name)
+    print(strings)
     file = file_name[:-4]
     with open(file + '.in', 'w') as file_in, open(file + '.label', 'w') as file_label:
         file_in.write('')
