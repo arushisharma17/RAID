@@ -60,7 +60,7 @@ def write_file(file_name, string, tokens, labels):
                 file_labels.write(labels[i] + ' ')
             file_in.write('\n')
             file_labels.write('\n')
-            prev = prev + count
+            prev = prev + count if count > 1 or prev > 0 else 0
             token_index = 0
         file_in.write('\n')
         file_labels.write('\n')
@@ -91,7 +91,7 @@ def generate_in_and_label_files(file_name, language):
 
 
 def main():
-    generate_in_and_label_files('java.txt', 'java')
+    generate_in_and_label_files('code.txt', 'java')
 
 
 if __name__ == "__main__":
