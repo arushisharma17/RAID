@@ -1,13 +1,14 @@
 from extract_patterns import extract_bio_labels_from_source_code
 
 label_types = {"::": "DOUBLECOLON", "--": "DOUBLEMINUS", "++": "DOUBLEPLUS", "false": "BOOL", "true": "BOOL",
-              "modifier": "MODIFIER", "basictype": "TYPE", "null": "IDENT", "keyword": "KEYWORD", "identifier": "IDENT",
-              "decimalinteger": "NUMBER", "decimalfloatingpoint": "NUMBER",
-              "string": "STRING", "(": "LPAR", ")": "RPAR", "[": "LSQB", "]": "RSQB", ",": "COMMA", "?": "CONDITIONOP",
+              "modifier": "MODIFIER", "public": "MODIFIER", "basictype": "TYPE", "null": "IDENT", "keyword": "KEYWORD",
+               "identifier": "IDENT", "decimalinteger": "NUMBER", "decimalfloatingpoint": "NUMBER",
+              "string": "STRING", "string_fragment": "STRING",
+               "(": "LPAR", ")": "RPAR", "[": "LSQB", "]": "RSQB", ",": "COMMA", "?": "CONDITIONOP",
               ";": "SEMI", "+": "PLUS", "-": "MINUS", "*": "STAR", "/": "SLASH", ".": "DOT", "=": "EQUAL", ":": "COLON",
               "|": "VBAR", "&": "AMPER", "<": "LESS", ">": "GREATER", "%": "PERCENT", "{": "LBRACE", "}": "RBRACE",
               "==": "EQEQUAL", "!=": "NOTEQUAL", "<=": "LESSEQUAL", ">=": "GREATEREQUAL", "~": "TILDE",
-              "^": "CIRCUMFLEX",
+              "^": "CIRCUMFLEX", "\"": "DQUOTES",
               "<<": "LEFTSHIFT", ">>": "RIGHTSHIFT", "**": "DOUBLESTAR", "+=": "PLUSEUQAL", "-=": "MINEQUAL",
               "*=": "STAREQUAL",
               "/=": "SLASHEQUAL", "%=": "PERCENTEQUAL", "&=": "AMPEREQUAL", "|=": "VBAREQUAL", "^=": "CIRCUMFLEXEQUAL",
@@ -44,8 +45,11 @@ def read_file(file_name):
 
 
 def convert_label(label):
-    condensed = label_types[label.lower()]
-    return condensed if condensed else label
+    label_l = label.lower()
+    check = label_l in label_types
+    if not check:
+        return label.upper()
+    return label_types[label.lower()]
 
 
 def write_file(file_name, string, tokens, labels):
@@ -114,7 +118,7 @@ def generate_in_and_label_files(file_name, language):
 
 
 def main():
-    generate_in_and_label_files('java_test.txt', 'java')
+    generate_in_and_label_files('java.txt', 'java')
 
 
 if __name__ == "__main__":
