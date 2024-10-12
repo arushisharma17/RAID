@@ -17,6 +17,7 @@ import neurox.data.extraction.transformers_extractor as transformers_extractor
 # Initialize the Java language
 JAVA_LANGUAGE = Language(tsjava.language())
 parser = Parser(JAVA_LANGUAGE)
+# parser.set_language(JAVA_LANGUAGE)
 
 def read_source_code(file_path: str) -> str:
     """Reads the source code from the given file path."""
@@ -24,14 +25,14 @@ def read_source_code(file_path: str) -> str:
         source_code = file.read()
     return source_code
 
-def extract_leaf_tokens(node):
-    """Recursively extracts tokens from the leaf nodes of the AST."""
+def extract_leaf_tokens(node, depth=0):
+    """Recursively extracts tokens from the leaf nodes of the AST, including depth."""
     tokens = []
     if len(node.children) == 0:
-        tokens.append((node.type, node.text.decode('utf-8')))
+        tokens.append((node.type, node.text.decode('utf-8'), depth))
     else:
         for child in node.children:
-            tokens.extend(extract_leaf_tokens(child))
+            tokens.extend(extract_leaf_tokens(child, depth + 1))
     return tokens
 
 def visualize_ast(node, graph, parent_id=None):
@@ -44,7 +45,7 @@ def visualize_ast(node, graph, parent_id=None):
     for child in node.children:
         visualize_ast(child, graph, node_id)
 
-def _create_binary_data(tokens, activations, binary_filter, balance_data=False):
+def _create_binary_data(tokens_with_depth, activations, binary_filter, balance_data=False):
     """Creates a binary labeled dataset based on the binary_filter."""
     if isinstance(binary_filter, set):
         filter_fn = lambda x: x in binary_filter
@@ -55,44 +56,39 @@ def _create_binary_data(tokens, activations, binary_filter, balance_data=False):
     else:
         raise NotImplementedError("ERROR: The binary_filter must be a set, a regex pattern, or a callable function.")
 
-    positive_class_words = []
-    positive_class_activations = []
-    negative_class_words = []
-    negative_class_activations = []
+    positive_class_data = []
+    negative_class_data = []
 
-    print("Creating binary dataset ...")
-    for word, activation in zip(tokens, activations):
-        if filter_fn(word):
-            positive_class_words.append(word)
-            positive_class_activations.append(activation)
+    for (token, depth), activation in zip(tokens_with_depth, activations):
+        if filter_fn(token):
+            positive_class_data.append(((token, depth), activation))
         else:
-            negative_class_words.append(word)
-            negative_class_activations.append(activation)
+            negative_class_data.append(((token, depth), activation))
 
-    if len(negative_class_words) == 0 or len(positive_class_words) == 0:
+    if len(negative_class_data) == 0 or len(positive_class_data) == 0:
         raise ValueError("ERROR: Positive or Negative class examples are zero")
-    elif len(negative_class_words) < len(positive_class_words):
-        print("WARNING: The negative class examples are less than the positive class examples")
-        print("Positive class examples:", len(positive_class_words), "Negative class examples:", len(negative_class_words))
 
+    # Combine positive and negative data
+    combined_data = positive_class_data + negative_class_data
+
+    # If balancing is required
     if balance_data:
         # Implement balancing if needed
         pass  # Skipping balancing for simplicity
 
-    print("Number of Positive examples:", len(positive_class_words))
+    words = [t for (t, _), _ in combined_data]
+    depths = [d for (_, d), _ in combined_data]
+    labels = ['positive'] * len(positive_class_data) + ['negative'] * len(negative_class_data)
+    activations = [a for _, a in combined_data]
 
-    words = positive_class_words + negative_class_words
-    labels = ['positive'] * len(positive_class_words) + ['negative'] * len(negative_class_words)
-    activations = positive_class_activations + negative_class_activations
+    return list(zip(words, depths)), labels, activations
 
-    return words, labels, activations
-
-def annotate_data(tokens, activations, binary_filter, output_prefix, balance_data=False):
+def annotate_data(tokens_with_depth, activations, binary_filter, output_prefix, balance_data=False):
     """Creates binary data and saves it."""
-    words, labels, activations = _create_binary_data(tokens, activations, binary_filter, balance_data=balance_data)
+    tokens_depths, labels, activations = _create_binary_data(tokens_with_depth, activations, binary_filter, balance_data=balance_data)
 
-    # Prepare output directory
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Prepare output directory at the same level as src
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     output_dir = os.path.join(base_dir, 'output')
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -102,16 +98,21 @@ def annotate_data(tokens, activations, binary_filter, output_prefix, balance_dat
     labels_file = os.path.join(output_dir, f"{output_prefix}_labels.txt")
     activations_file = os.path.join(output_dir, f"{output_prefix}_activations.txt")
 
-    with open(words_file, "w", encoding='utf-8') as f:
-        f.write("\n".join(words))
+    with open(words_file, "w", encoding='utf-8') as f_words, open(labels_file, "w", encoding='utf-8') as f_labels:
+        current_depth = -1
+        for (word, depth), label in zip(tokens_depths, labels):
+            # Start a new line if depth decreases
+            if depth <= current_depth:
+                f_words.write('\n')
+                f_labels.write('\n')
+            current_depth = depth
+            # Write token and label with a space separator
+            f_words.write(f"{word} ")
+            f_labels.write(f"{label} ")
 
-    with open(labels_file, "w", encoding='utf-8') as f:
-        f.write("\n".join(labels))
-
-    # Save activations to text file
+    # Save activations to text file (one per line)
     with open(activations_file, 'w', encoding='utf-8') as f:
         for activation_vector in activations:
-            # Convert numpy array to list if necessary
             if isinstance(activation_vector, np.ndarray):
                 activation_vector = activation_vector.tolist()
             activation_str = ' '.join(map(str, activation_vector))
@@ -144,17 +145,17 @@ def main():
     tree = parser.parse(source_code.encode('utf-8'))
     root_node = tree.root_node
 
-    # Extract tokens from leaf nodes
+    # Extract tokens from leaf nodes, including depth
     tokens_tuples = extract_leaf_tokens(root_node)
-    tokens = [token_text for _, token_text in tokens_tuples]
+    tokens = [token_text for _, token_text, _ in tokens_tuples]
 
-    # Print tokens and labels
+    # Print tokens, types, and depths
     print("Extracted Tokens:")
-    for token_type, token_text in tokens_tuples:
-        print(f"Type: {token_type}, Text: {token_text}")
+    for token_type, token_text, depth in tokens_tuples:
+        print(f"Type: {token_type}, Text: {token_text}, Depth: {depth}")
 
-    # Prepare output directory
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Prepare output directory at the same level as src
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     output_dir = os.path.join(base_dir, 'output')
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -172,7 +173,7 @@ def main():
         model,
         input_file,
         output_file,
-        aggregation="average",  # or "last", "first"
+        aggregation="average",
         output_type="json"
     )
 
@@ -185,10 +186,8 @@ def main():
     extracted_tokens = []
 
     for feature in activation_data['features']:
-        token = feature['token']
-        token = token.replace('Ġ', '')
+        token = feature['token'].replace('Ġ', '')
         layers = feature['layers']
-        # Concatenate activations from all layers
         activation_values = []
         for layer in layers:
             activation_values.extend(layer['values'])
@@ -205,7 +204,8 @@ def main():
         raise NotImplementedError("Filter must start with 're:' for regex or 'set:' for a set of words.")
 
     # Annotate the data
-    annotate_data(extracted_tokens, activations, binary_filter, args.output_prefix, balance_data=True)
+    tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
+    annotate_data(tokens_with_depth, activations, binary_filter, args.output_prefix, balance_data=True)
 
     # Visualize the AST
     graph = graphviz.Digraph(format='png')
