@@ -1,7 +1,8 @@
-public public 
-static 
+public 
 class 
-HelloWorld { void 
+HelloWorld { public 
+static 
+void 
 main ( String [ 
 ] 
 args 

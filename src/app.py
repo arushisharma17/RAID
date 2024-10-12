@@ -4,7 +4,6 @@ import argparse
 import numpy as np
 import re
 import json
-from tqdm import tqdm
 from typing import Pattern
 
 from tree_sitter import Parser, Language
@@ -16,111 +15,197 @@ import neurox.data.extraction.transformers_extractor as transformers_extractor
 
 # Initialize the Java language
 JAVA_LANGUAGE = Language(tsjava.language())
-parser = Parser(JAVA_LANGUAGE)
-# parser.set_language(JAVA_LANGUAGE)
 
-def read_source_code(file_path: str) -> str:
-    """Reads the source code from the given file path."""
-    with open(file_path, 'r', encoding='utf-8') as file:
-        source_code = file.read()
-    return source_code
+class JavaASTProcessor:
+    """Class to handle AST parsing and visualization."""
+    def __init__(self, java_file_path, output_dir):
+        self.java_file_path = java_file_path
+        self.output_dir = output_dir
+        self.source_code = None
+        self.tree = None
+        self.root_node = None
+        self.tokens_tuples = None
+        self.tokens = None
+        self.parser = Parser(JAVA_LANGUAGE)
 
-def extract_leaf_tokens(node, depth=0):
-    """Recursively extracts tokens from the leaf nodes of the AST, including depth."""
-    tokens = []
-    if len(node.children) == 0:
-        tokens.append((node.type, node.text.decode('utf-8'), depth))
-    else:
-        for child in node.children:
-            tokens.extend(extract_leaf_tokens(child, depth + 1))
-    return tokens
+    def process_ast(self):
+        """Reads and parses the source code, extracts tokens, and writes tokens to file."""
+        self.read_source_code()
+        self.parse_source_code()
+        self.tokens_tuples = self.extract_leaf_tokens()
+        self.tokens = [token_text for _, token_text, _ in self.tokens_tuples]
+        self.write_tokens_to_file()
 
-def visualize_ast(node, graph, parent_id=None):
-    """Recursively builds the AST visualization."""
-    node_id = str(id(node))
-    label = f"{node.type} [{node.start_point}-{node.end_point}]"
-    graph.node(node_id, label)
-    if parent_id:
-        graph.edge(parent_id, node_id)
-    for child in node.children:
-        visualize_ast(child, graph, node_id)
+    def read_source_code(self):
+        """Reads the source code from the given file path."""
+        with open(self.java_file_path, 'r', encoding='utf-8') as file:
+            self.source_code = file.read()
 
-def _create_binary_data(tokens_with_depth, activations, binary_filter, balance_data=False):
-    """Creates a binary labeled dataset based on the binary_filter."""
-    if isinstance(binary_filter, set):
-        filter_fn = lambda x: x in binary_filter
-    elif isinstance(binary_filter, Pattern):
-        filter_fn = lambda x: binary_filter.match(x)
-    elif callable(binary_filter):
-        filter_fn = binary_filter
-    else:
-        raise NotImplementedError("ERROR: The binary_filter must be a set, a regex pattern, or a callable function.")
+    def parse_source_code(self):
+        """Parses the source code into an AST."""
+        self.tree = self.parser.parse(self.source_code.encode('utf-8'))
+        self.root_node = self.tree.root_node
 
-    positive_class_data = []
-    negative_class_data = []
-
-    for (token, depth), activation in zip(tokens_with_depth, activations):
-        if filter_fn(token):
-            positive_class_data.append(((token, depth), activation))
+    def extract_leaf_tokens(self, node=None, depth=0):
+        """Recursively extracts tokens from the leaf nodes of the AST, including depth."""
+        if node is None:
+            node = self.root_node
+        tokens = []
+        if len(node.children) == 0:
+            tokens.append((node.type, node.text.decode('utf-8'), depth))
         else:
-            negative_class_data.append(((token, depth), activation))
+            for child in node.children:
+                tokens.extend(self.extract_leaf_tokens(child, depth + 1))
+        return tokens
 
-    if len(negative_class_data) == 0 or len(positive_class_data) == 0:
-        raise ValueError("ERROR: Positive or Negative class examples are zero")
+    def write_tokens_to_file(self):
+        """Writes tokens to input_sentences.txt in the output directory."""
+        input_file = os.path.join(self.output_dir, 'input_sentences.txt')
+        with open(input_file, 'w', encoding='utf-8') as f:
+            f.write(' '.join(self.tokens) + '\n')
+        print(f"Tokens written to '{input_file}'.")
+        # Also, print the tokens, types, and depths
+        print("Extracted Tokens:")
+        for token_type, token_text, depth in self.tokens_tuples:
+            print(f"Type: {token_type}, Text: {token_text}, Depth: {depth}")
 
-    # Combine positive and negative data
-    combined_data = positive_class_data + negative_class_data
+    def visualize_ast(self, input_filename):
+        """Visualizes the AST and saves it as a PNG file."""
+        graph = graphviz.Digraph(format='png')
+        self._visualize_ast(self.root_node, graph)
+        ast_output_path = os.path.join(self.output_dir, f'{input_filename}_ast')
+        graph.render(ast_output_path, format='png', cleanup=True)
+        print(f"\nAST visualization saved as '{ast_output_path}.png'.")
 
-    # If balancing is required
-    if balance_data:
-        # Implement balancing if needed
-        pass  # Skipping balancing for simplicity
+    def _visualize_ast(self, node, graph, parent_id=None):
+        """Helper method for visualizing the AST."""
+        node_id = str(id(node))
+        label = f"{node.type} [{node.start_point}-{node.end_point}]"
+        graph.node(node_id, label)
+        if parent_id:
+            graph.edge(parent_id, node_id)
+        for child in node.children:
+            self._visualize_ast(child, graph, node_id)
 
-    words = [t for (t, _), _ in combined_data]
-    depths = [d for (_, d), _ in combined_data]
-    labels = ['positive'] * len(positive_class_data) + ['negative'] * len(negative_class_data)
-    activations = [a for _, a in combined_data]
+class ActivationAnnotator:
+    """Class to handle activation generation and data annotation."""
+    def __init__(self, model_name, device='cpu', binary_filter='set:public,static', output_prefix='output'):
+        self.model_name = model_name
+        self.device = device
+        self.binary_filter = binary_filter
+        self.output_prefix = output_prefix
+        self.binary_filter_compiled = None
 
-    return list(zip(words, depths)), labels, activations
+    def process_activations(self, tokens_tuples, output_dir):
+        """Generates activations, parses them, handles binary filter, and annotates data."""
+        input_file = os.path.join(output_dir, 'input_sentences.txt')
+        output_file = os.path.join(output_dir, 'activations.json')
+        # Generate activations
+        self.generate_activations(input_file, output_file)
+        # Parse activations
+        extracted_tokens, activations = self.parse_activations(output_file)
+        # Handle binary filter
+        self.handle_binary_filter()
+        # Prepare tokens with depth
+        tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
+        # Annotate data
+        self.annotate_data(tokens_with_depth, activations, output_dir)
 
-def annotate_data(tokens_with_depth, activations, binary_filter, output_prefix, balance_data=False):
-    """Creates binary data and saves it."""
-    tokens_depths, labels, activations = _create_binary_data(tokens_with_depth, activations, binary_filter, balance_data=balance_data)
+    def generate_activations(self, input_file, output_file):
+        """Generates activations using the specified transformer model."""
+        transformers_extractor.extract_representations(
+            self.model_name,
+            input_file,
+            output_file,
+            aggregation="average",
+            output_type="json",
+            device=self.device
+        )
 
-    # Prepare output directory at the same level as src
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    output_dir = os.path.join(base_dir, 'output')
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    def parse_activations(self, activation_file):
+        """Parses the activations from the JSON output."""
+        with open(activation_file, 'r', encoding='utf-8') as f:
+            activation_data = json.load(f)
+        activations = []
+        extracted_tokens = []
+        for feature in activation_data['features']:
+            token = feature['token'].replace('Ġ', '')
+            layers = feature['layers']
+            activation_values = []
+            for layer in layers:
+                activation_values.extend(layer['values'])
+            activations.append(np.array(activation_values))
+            extracted_tokens.append(token)
+        return extracted_tokens, activations
 
-    # Save the files
-    words_file = os.path.join(output_dir, f"{output_prefix}_tokens.txt")
-    labels_file = os.path.join(output_dir, f"{output_prefix}_labels.txt")
-    activations_file = os.path.join(output_dir, f"{output_prefix}_activations.txt")
+    def handle_binary_filter(self):
+        """Compiles the binary filter based on user input."""
+        if self.binary_filter.startswith("re:"):
+            self.binary_filter_compiled = re.compile(self.binary_filter[3:])
+        elif self.binary_filter.startswith("set:"):
+            self.binary_filter_compiled = set(self.binary_filter[4:].split(","))
+        else:
+            raise NotImplementedError("Filter must start with 're:' for regex or 'set:' for a set of words.")
 
-    with open(words_file, "w", encoding='utf-8') as f_words, open(labels_file, "w", encoding='utf-8') as f_labels:
-        current_depth = -1
-        for (word, depth), label in zip(tokens_depths, labels):
-            # Start a new line if depth decreases
-            if depth <= current_depth:
-                f_words.write('\n')
-                f_labels.write('\n')
-            current_depth = depth
-            # Write token and label with a space separator
-            f_words.write(f"{word} ")
-            f_labels.write(f"{label} ")
+    def annotate_data(self, tokens_with_depth, activations, output_dir):
+        """Creates binary data and saves it."""
+        tokens_depths, labels, activations = self._create_binary_data(tokens_with_depth, activations, self.binary_filter_compiled, balance_data=True)
 
-    # Save activations to text file (one per line)
-    with open(activations_file, 'w', encoding='utf-8') as f:
-        for activation_vector in activations:
-            if isinstance(activation_vector, np.ndarray):
-                activation_vector = activation_vector.tolist()
-            activation_str = ' '.join(map(str, activation_vector))
-            f.write(activation_str + '\n')
+        # Save the files
+        words_file = os.path.join(output_dir, f"{self.output_prefix}_tokens.txt")
+        labels_file = os.path.join(output_dir, f"{self.output_prefix}_labels.txt")
+        activations_file = os.path.join(output_dir, f"{self.output_prefix}_activations.txt")
 
-    print(f"Words saved to '{words_file}'.")
-    print(f"Labels saved to '{labels_file}'.")
-    print(f"Activations saved to '{activations_file}'.")
+        with open(words_file, "w", encoding='utf-8') as f_words, open(labels_file, "w", encoding='utf-8') as f_labels:
+            current_depth = -1
+            for (word, depth), label in zip(tokens_depths, labels):
+                # Start a new line if depth decreases
+                if depth <= current_depth:
+                    f_words.write('\n')
+                    f_labels.write('\n')
+                current_depth = depth
+                # Write token and label with a space separator
+                f_words.write(f"{word} ")
+                f_labels.write(f"{label} ")
+
+        # Save activations to text file (one per line)
+        with open(activations_file, 'w', encoding='utf-8') as f:
+            for activation_vector in activations:
+                if isinstance(activation_vector, np.ndarray):
+                    activation_vector = activation_vector.tolist()
+                activation_str = ' '.join(map(str, activation_vector))
+                f.write(activation_str + '\n')
+
+        print(f"Words saved to '{words_file}'.")
+        print(f"Labels saved to '{labels_file}'.")
+        print(f"Activations saved to '{activations_file}'.")
+
+    def _create_binary_data(self, tokens_with_depth, activations, binary_filter, balance_data=False):
+        """Creates a binary labeled dataset based on the binary_filter."""
+        if isinstance(binary_filter, set):
+            filter_fn = lambda x: x in binary_filter
+        elif isinstance(binary_filter, Pattern):
+            filter_fn = lambda x: binary_filter.match(x)
+        elif callable(binary_filter):
+            filter_fn = binary_filter
+        else:
+            raise NotImplementedError("ERROR: The binary_filter must be a set, a regex pattern, or a callable function.")
+
+        words = []
+        depths = []
+        labels = []
+        final_activations = []
+
+        for (token, depth), activation in zip(tokens_with_depth, activations):
+            words.append(token)
+            depths.append(depth)
+            if filter_fn(token):
+                labels.append('positive')
+            else:
+                labels.append('negative')
+            final_activations.append(activation)
+
+        return list(zip(words, depths)), labels, final_activations
 
 def main():
     # Set up argument parser
@@ -138,85 +223,30 @@ def main():
         print(f"Error: File '{java_file_path}' does not exist.")
         sys.exit(1)
 
-    # Read the source code from the file
-    source_code = read_source_code(java_file_path)
-
-    # Parse the source code
-    tree = parser.parse(source_code.encode('utf-8'))
-    root_node = tree.root_node
-
-    # Extract tokens from leaf nodes, including depth
-    tokens_tuples = extract_leaf_tokens(root_node)
-    tokens = [token_text for _, token_text, _ in tokens_tuples]
-
-    # Print tokens, types, and depths
-    print("Extracted Tokens:")
-    for token_type, token_text, depth in tokens_tuples:
-        print(f"Type: {token_type}, Text: {token_text}, Depth: {depth}")
-
     # Prepare output directory at the same level as src
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     output_dir = os.path.join(base_dir, 'output')
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # Write tokens to input file
-    input_file = os.path.join(output_dir, 'input_sentences.txt')
-    with open(input_file, 'w', encoding='utf-8') as f:
-        f.write(' '.join(tokens) + '\n')
-
-    # Generate activations using NeuroX transformers_extractor
-    model = args.model
-    output_file = os.path.join(output_dir, 'activations.json')
-
-    transformers_extractor.extract_representations(
-        model,
-        input_file,
-        output_file,
-        aggregation="average",
-        output_type="json"
+    # Initialize classes
+    ast_processor = JavaASTProcessor(java_file_path, output_dir)
+    activation_annotator = ActivationAnnotator(
+        model_name=args.model,
+        device=args.device,
+        binary_filter=args.binary_filter,
+        output_prefix=args.output_prefix
     )
 
-    # Read activations from the output file
-    with open(output_file, 'r', encoding='utf-8') as f:
-        activation_data = json.load(f)
+    # Process AST and write tokens
+    ast_processor.process_ast()
 
-    # Adjusted code to parse the new format
-    activations = []
-    extracted_tokens = []
-
-    for feature in activation_data['features']:
-        token = feature['token'].replace('Ġ', '')
-        layers = feature['layers']
-        activation_values = []
-        for layer in layers:
-            activation_values.extend(layer['values'])
-        activations.append(np.array(activation_values))
-        extracted_tokens.append(token)
-
-    # Handle binary filter input
-    binary_filter = args.binary_filter
-    if binary_filter.startswith("re:"):
-        binary_filter = re.compile(binary_filter[3:])
-    elif binary_filter.startswith("set:"):
-        binary_filter = set(binary_filter[4:].split(","))
-    else:
-        raise NotImplementedError("Filter must start with 're:' for regex or 'set:' for a set of words.")
-
-    # Annotate the data
-    tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
-    annotate_data(tokens_with_depth, activations, binary_filter, args.output_prefix, balance_data=True)
+    # Process activations and annotate data
+    activation_annotator.process_activations(ast_processor.tokens_tuples, output_dir)
 
     # Visualize the AST
-    graph = graphviz.Digraph(format='png')
-    visualize_ast(root_node, graph)
-
-    # Create an output filename based on input file name
     input_filename = os.path.splitext(os.path.basename(java_file_path))[0]
-    ast_output_path = os.path.join(output_dir, f'{input_filename}_ast')
-    graph.render(ast_output_path, format='png', cleanup=True)
-
-    print(f"\nAST visualization saved as '{ast_output_path}.png'.")
+    ast_processor.visualize_ast(input_filename)
 
 if __name__ == "__main__":
     main()
