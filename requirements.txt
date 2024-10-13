@@ -47,6 +47,7 @@ tqdm==4.66.5
 transformers==4.45.1
 tree-sitter==0.23.0
 tree-sitter-java==0.23.2
+tree-sitter-python==0.23.2
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
