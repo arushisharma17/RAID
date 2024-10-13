@@ -110,6 +110,12 @@ class ActivationAnnotator:
         tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
         # Annotate data
         self.annotate_data(tokens_with_depth, activations, output_dir)
+        # Aggregate activations using scalar aggregation
+        token_to_scalar_activation = self.aggregate_activations_scalar(tokens_with_depth, activations)
+        # Output mapping to file
+        self.write_token_activation_mapping(token_to_scalar_activation, output_dir)
+        # Keep the mean vector function for future reference (not used by default)
+        # token_to_mean_activation = self.aggregate_activations(tokens_with_depth, activations)
 
     def generate_activations(self, input_file, output_file):
         """Generates activations using the specified transformer model."""
@@ -131,10 +137,9 @@ class ActivationAnnotator:
         for feature in activation_data['features']:
             token = feature['token'].replace('Ġ', '')
             layers = feature['layers']
-            activation_values = []
-            for layer in layers:
-                activation_values.extend(layer['values'])
-            activations.append(np.array(activation_values))
+            # Only use activations from the last layer
+            last_layer_values = layers[-1]['values']
+            activations.append(np.array(last_layer_values))
             extracted_tokens.append(token)
         return extracted_tokens, activations
 
@@ -206,6 +211,46 @@ class ActivationAnnotator:
             final_activations.append(activation)
 
         return list(zip(words, depths)), labels, final_activations
+
+    def aggregate_activations_scalar(self, tokens_with_depth, activations):
+        """Aggregates activations for each token by computing a scalar value."""
+        from collections import defaultdict
+        token_to_activations = defaultdict(list)
+        for (token, depth), activation in zip(tokens_with_depth, activations):
+            token_to_activations[token].append(activation)
+        token_to_scalar_activation = {}
+        for token, activation_list in token_to_activations.items():
+            # Stack activation arrays
+            stacked_activations = np.stack(activation_list)
+            # Compute mean activation vector
+            mean_activation_vector = np.mean(stacked_activations, axis=0)
+            # Compute scalar value (e.g., mean of the mean activation vector)
+            scalar_activation = np.mean(mean_activation_vector)
+            token_to_scalar_activation[token] = scalar_activation
+        return token_to_scalar_activation
+
+    def write_token_activation_mapping(self, token_to_activation, output_dir):
+        """Writes the token to scalar activation mapping to a JSON file."""
+        # Construct output file path
+        mapping_file = os.path.join(output_dir, f"{self.output_prefix}_scalar_token_activation_mapping.json")
+        # Write to file
+        with open(mapping_file, 'w', encoding='utf-8') as f:
+            json.dump(token_to_activation, f, indent=2)
+        print(f"Token activation mapping saved to '{mapping_file}'.")
+
+    # Existing mean vector aggregation function (kept for future reference)
+    def aggregate_activations(self, tokens_with_depth, activations):
+        """Aggregates activations for each token by computing the mean activation vector."""
+        from collections import defaultdict
+        token_to_activations = defaultdict(list)
+        for (token, depth), activation in zip(tokens_with_depth, activations):
+            token_to_activations[token].append(activation)
+        token_to_mean_activation = {}
+        for token, activation_list in token_to_activations.items():
+            # Stack activation arrays and compute mean along axis 0
+            mean_activation = np.mean(np.stack(activation_list), axis=0)
+            token_to_mean_activation[token] = mean_activation
+        return token_to_mean_activation
 
 def main():
     # Set up argument parser
