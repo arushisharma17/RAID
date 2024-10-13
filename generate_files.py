@@ -71,6 +71,7 @@ class TokenLabelFilesGenerator:
         labels : List[str]
             The list of labels to be parsed through.
         """
+        decreased = False
         prev = 0
         with open(file_name + '.in', 'a') as file_in, open(file_name + '.label', 'a') as file_labels:
             lines = string.split('\n')
@@ -79,11 +80,13 @@ class TokenLabelFilesGenerator:
                 for count, t in enumerate(tokens[prev:]):
                     ti = line.find(t, token_index)
                     if ti >= token_index:
-                        token_index = ti
+                        token_index = ti + 1
                     else:
-                        count = count - 1
+                        if count >= 2:
+                            count = count - 1
+                            decreased = True
                         break
-                if count == 1:
+                if count == 1 and not decreased:
                     count = count - 1
                 for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
                     file_in.write(token + ' ')
@@ -92,6 +95,7 @@ class TokenLabelFilesGenerator:
                 file_labels.write('\n')
                 prev = prev + count + 1
                 token_index = 0
+                decreased = False
             file_in.write('\n')
             file_labels.write('\n')
 
@@ -112,7 +116,6 @@ class TokenLabelFilesGenerator:
 
         extractor = PatternExtractor()
         strings = self.read_file(file_name)
-        print(strings)
         file = file_name[:-4]
         with open(file + '.in', 'w') as file_in, open(file + '.label', 'w') as file_label:
             file_in.write('')
@@ -124,7 +127,7 @@ class TokenLabelFilesGenerator:
 
 def main():
     g = TokenLabelFilesGenerator()
-    g.generate_in_and_label_files('java.txt', 'java')
+    g.generate_in_and_label_files('small-src-chunck1.txt', 'java')
 
 
 if __name__ == "__main__":
