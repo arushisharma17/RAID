@@ -111,12 +111,9 @@ class TokenLabelFilesGenerator:
         language : str
             The language to extra labels in.
         """
-        if file_name[-4:] != '.txt':
-            raise Exception("Input a text file.")
-
         extractor = PatternExtractor()
         strings = self.read_file(file_name)
-        file = file_name[:-4]
+        file = file_name.split('.')[0]
         with open(file + '.in', 'w') as file_in, open(file + '.label', 'w') as file_label:
             file_in.write('')
             file_label.write('')
