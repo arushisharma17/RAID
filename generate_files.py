@@ -41,7 +41,7 @@ class TokenLabelFilesGenerator:
             for line in file:
                 if line != '\n':
                     st += line
-                else:
+                elif line != '\n':
                     strings.append(st.strip())
                     st = ''
             strings.append(st)
@@ -124,7 +124,7 @@ class TokenLabelFilesGenerator:
 
 def main():
     g = TokenLabelFilesGenerator()
-    g.generate_in_and_label_files('small-src-chunck1.txt', 'java')
+    g.generate_in_and_label_files('input/newtest.java', 'java')
 
 
 if __name__ == "__main__":
