@@ -1,5 +1,6 @@
 from extract_patterns import PatternExtractor
 from label_dictionary import LabelDictionary
+import os
 
 
 class TokenLabelFilesGenerator:
@@ -64,7 +65,6 @@ class TokenLabelFilesGenerator:
                     count = count - 1
                 for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
                     file_in.write(token + ' ')
-                    file_labels.write(self.convert_label(label[2:]) + ' ')
                     file_labels.write(label_dict.convert_label(label[2:]) + ' ')
                 file_in.write('\n')
                 file_labels.write('\n')
@@ -75,32 +75,37 @@ class TokenLabelFilesGenerator:
             file_labels.write('\n')
 
 
-    def generate_in_and_label_files(self, file_name, language, depth=-1):
+    def generate_in_and_label_files(self, source_file, language, depth=-1):
         """
         Generates .in and .label files for the given text file.
 
         Parameters
         ----------
-        file_name : str
+        source_file : str
             The text file containing elements to be written to the .in and .label files.
         language : str
             The language to extra labels in.
+        depth : int
+            The desired depth of the AST tree to parse.
         """
         extractor = PatternExtractor()
-        strings = self.read_file(file_name)
-        file = file_name.split('.')[0]
-        with open(file + '.in', 'w') as file_in, open(file + '.label', 'w') as file_label:
+        strings = self.read_file(source_file)
+        file_name = 'output/' + os.path.basename(source_file).split('.')[0]
+        with open(file_name + '.in', 'w') as file_in, open(file_name + '.label', 'w') as file_label:
             file_in.write('')
             file_label.write('')
         for st in strings:
             tokens, labels, _ = extractor.extract_bio_labels_from_source_code(bytes(st, encoding='utf8'), language, depth)
-            self.write_file(file, st, tokens, labels)
+            self.write_file(file_name, st, tokens, labels)
 
 
-    def generate_json_file(self, source_code, language):
+    def generate_json_file(self, source_file, language):
         extractor = PatternExtractor()
-        file = source_code.split('.')[0]
-        strings = self.read_file(source_code)
+        file_name = 'output/' + os.path.basename(source_file).split('.')[0]
+        strings = self.read_file(source_file)
+        code = '\n'.join(strings)
+        extractor.create_tree_json(bytes(code, encoding='utf8'), language, file_name)
+
 
 
 # if __name__ == "__main__":
