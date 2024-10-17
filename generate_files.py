@@ -65,7 +65,7 @@ class TokenLabelFilesGenerator:
                     count = count - 1
                 for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
                     file_in.write(token + ' ')
-                    file_labels.write(label_dict.convert_label(label[2:]) + ' ')
+                    file_labels.write(label[:2] + label_dict.convert_label(label[2:]) + ' ')
                 file_in.write('\n')
                 file_labels.write('\n')
                 prev = prev + count + 1
