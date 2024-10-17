@@ -48,7 +48,8 @@ class TokenLabelFilesGenerator:
         label_dict = LabelDictionary()
         decreased = False
         prev = 0
-        with open(file_name + '.in', 'a') as file_in, open(file_name + '.label', 'a') as file_labels:
+        with (open(file_name + '.in', 'a') as file_in, open(file_name + '.label', 'a') as file_labels,
+              open(file_name + '.bio', 'w') as file_bio):
             lines = string.split('\n')
             token_index = 0
             for line in lines:
@@ -65,14 +66,17 @@ class TokenLabelFilesGenerator:
                     count = count - 1
                 for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
                     file_in.write(token + ' ')
-                    file_labels.write(label[:2] + label_dict.convert_label(label[2:]) + ' ')
+                    file_labels.write(label_dict.convert_label(label[2:]) + ' ')
+                    file_bio.write(label[0] + ' ')
                 file_in.write('\n')
                 file_labels.write('\n')
+                file_bio.write('\n')
                 prev = prev + count + 1
                 token_index = 0
                 decreased = False
             file_in.write('\n')
             file_labels.write('\n')
+            file_bio.write('\n')
 
 
     def generate_in_and_label_files(self, source_file, language, depth=-1):
@@ -91,9 +95,11 @@ class TokenLabelFilesGenerator:
         extractor = PatternExtractor()
         strings = self.read_file(source_file)
         file_name = 'output/' + os.path.basename(source_file).split('.')[0]
-        with open(file_name + '.in', 'w') as file_in, open(file_name + '.label', 'w') as file_label:
+        with (open(file_name + '.in', 'w') as file_in, open(file_name + '.label', 'w') as file_label,
+              open(file_name + '.bio', 'w') as file_bio):
             file_in.write('')
             file_label.write('')
+            file_bio.write('')
         for st in strings:
             tokens, labels, _ = extractor.extract_bio_labels_from_source_code(bytes(st, encoding='utf8'), language, depth)
             self.write_file(file_name, st, tokens, labels)
