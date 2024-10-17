@@ -136,38 +136,38 @@ class PatternExtractor:
         return token_data, label_data, leaf_labels
 
 
-def main():
-    # source_code = b'''
-    # public class HelloWorld {
-    #     public static void main(String[] args) {
-    #         System.out.println("Hello, World!");
-    #     }
-    # }
-    # '''
+# def main():
+#     # source_code = b'''
+#     # public class HelloWorld {
+#     #     public static void main(String[] args) {
+#     #         System.out.println("Hello, World!");
+#     #     }
+#     # }
+#     # '''
 
-    # source_code = b'''
-    # for (int i = 0; i < 10; i++) {
-    #     System.out.println(i);
-    # }
-    # # '''
+#     # source_code = b'''
+#     # for (int i = 0; i < 10; i++) {
+#     #     System.out.println(i);
+#     # }
+#     # # '''
 
-    # source_code = b'''
-    # def add_numbers (a, b):
-    #     return a + b
-    # '''
+#     # source_code = b'''
+#     # def add_numbers (a, b):
+#     #     return a + b
+#     # '''
 
-    # source_code = b'''
-    # # Comment about function
-    # '''
+#     # source_code = b'''
+#     # # Comment about function
+#     # '''
 
-    source_code = b'''
-    public int addNumbers(a, b) {
-        return a + b;
-    }
-    '''
-    e = PatternExtractor()
-    e.extract_bio_labels_from_source_code(source_code, 'java')
+#     source_code = b'''
+#     public int addNumbers(a, b) {
+#         return a + b;
+#     }
+#     '''
+#     e = PatternExtractor()
+#     e.extract_bio_labels_from_source_code(source_code, 'java')
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

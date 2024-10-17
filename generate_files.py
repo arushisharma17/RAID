@@ -122,10 +122,10 @@ class TokenLabelFilesGenerator:
             self.write_file(file, st, tokens, labels)
 
 
-def main():
-    g = TokenLabelFilesGenerator()
-    g.generate_in_and_label_files('input/newtest.java', 'java')
+# def main():
+#     g = TokenLabelFilesGenerator()
+#     g.generate_in_and_label_files('input/newtest.java', 'java')
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

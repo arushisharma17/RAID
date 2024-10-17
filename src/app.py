@@ -252,46 +252,46 @@ class ActivationAnnotator:
             token_to_mean_activation[token] = mean_activation
         return token_to_mean_activation
 
-def main():
-    # Set up argument parser
-    parser_arg = argparse.ArgumentParser(description='Parse Java code and generate AST visualization and activations.')
-    parser_arg.add_argument('file', help='Path to the Java source file.')
-    parser_arg.add_argument('--model', default='bert-base-uncased', help='Transformer model to use for activations.')
-    parser_arg.add_argument('--device', default='cpu', help='Device to run the model on ("cpu" or "cuda").')
-    parser_arg.add_argument('--binary_filter', default='set:public,static', help='Binary filter for labeling.')
-    parser_arg.add_argument('--output_prefix', default='output', help='Prefix for output files.')
-    args = parser_arg.parse_args()
+# def main():
+#     # Set up argument parser
+#     parser_arg = argparse.ArgumentParser(description='Parse Java code and generate AST visualization and activations.')
+#     parser_arg.add_argument('file', help='Path to the Java source file.')
+#     parser_arg.add_argument('--model', default='bert-base-uncased', help='Transformer model to use for activations.')
+#     parser_arg.add_argument('--device', default='cpu', help='Device to run the model on ("cpu" or "cuda").')
+#     parser_arg.add_argument('--binary_filter', default='set:public,static', help='Binary filter for labeling.')
+#     parser_arg.add_argument('--output_prefix', default='output', help='Prefix for output files.')
+#     args = parser_arg.parse_args()
 
-    java_file_path = args.file
+#     java_file_path = args.file
 
-    if not os.path.isfile(java_file_path):
-        print(f"Error: File '{java_file_path}' does not exist.")
-        sys.exit(1)
+#     if not os.path.isfile(java_file_path):
+#         print(f"Error: File '{java_file_path}' does not exist.")
+#         sys.exit(1)
 
-    # Prepare output directory at the same level as src
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    output_dir = os.path.join(base_dir, 'output')
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+#     # Prepare output directory at the same level as src
+#     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     output_dir = os.path.join(base_dir, 'output')
+#     if not os.path.exists(output_dir):
+#         os.makedirs(output_dir)
 
-    # Initialize classes
-    ast_processor = JavaASTProcessor(java_file_path, output_dir)
-    activation_annotator = ActivationAnnotator(
-        model_name=args.model,
-        device=args.device,
-        binary_filter=args.binary_filter,
-        output_prefix=args.output_prefix
-    )
+#     # Initialize classes
+#     ast_processor = JavaASTProcessor(java_file_path, output_dir)
+#     activation_annotator = ActivationAnnotator(
+#         model_name=args.model,
+#         device=args.device,
+#         binary_filter=args.binary_filter,
+#         output_prefix=args.output_prefix
+#     )
 
-    # Process AST and write tokens
-    ast_processor.process_ast()
+#     # Process AST and write tokens
+#     ast_processor.process_ast()
 
-    # Process activations and annotate data
-    activation_annotator.process_activations(ast_processor.tokens_tuples, output_dir)
+#     # Process activations and annotate data
+#     activation_annotator.process_activations(ast_processor.tokens_tuples, output_dir)
 
-    # Visualize the AST
-    input_filename = os.path.splitext(os.path.basename(java_file_path))[0]
-    ast_processor.visualize_ast(input_filename)
+#     # Visualize the AST
+#     input_filename = os.path.splitext(os.path.basename(java_file_path))[0]
+#     ast_processor.visualize_ast(input_filename)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
