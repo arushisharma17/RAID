@@ -100,7 +100,7 @@ class TokenLabelFilesGenerator:
             file_labels.write('\n')
 
 
-    def generate_in_and_label_files(self, file_name, language):
+    def generate_in_and_label_files(self, file_name, language, depth=-1):
         """
         Generates .in and .label files for the given text file.
 
@@ -118,13 +118,13 @@ class TokenLabelFilesGenerator:
             file_in.write('')
             file_label.write('')
         for st in strings:
-            tokens, labels, _ = extractor.extract_bio_labels_from_source_code(bytes(st, encoding='utf8'), language)
+            tokens, labels, _ = extractor.extract_bio_labels_from_source_code(bytes(st, encoding='utf8'), language, depth)
             self.write_file(file, st, tokens, labels)
 
 
 def main():
     g = TokenLabelFilesGenerator()
-    g.generate_in_and_label_files('input/newtest.java', 'java')
+    g.generate_in_and_label_files('input/newtest.java', 'java', 2)
 
 
 if __name__ == "__main__":
