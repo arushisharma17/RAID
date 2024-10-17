@@ -4,6 +4,10 @@ from tree_sitter import Language, Parser, Node
 import tree_sitter_java as tsjava
 import tree_sitter_python as tspython
 import pandas as pd
+import json
+
+from label_dictionary import LabelDictionary
+
 
 class PatternExtractor:
 
@@ -144,6 +148,37 @@ class PatternExtractor:
 #     #     }
 #     # }
 #     # '''
+    def create_tree_json(self, source_code, language, name):
+        if language == 'java':
+            code_language = Language(tsjava.language())
+        elif language == 'python':
+            code_language = Language(tspython.language())
+        else:
+            print("Please pick Java or Python as a language.")
+            return
+        parser = Parser(code_language)
+        tree = parser.parse(source_code)
+        root_node = tree.root_node
+        label_dictionary = LabelDictionary()
+
+        def tree_to_dict(node):
+            # Convert the current node's attributes into a dictionary
+            node_dict = {
+                'token': str(node.text)[2:-1],
+                'label': label_dictionary.convert_label(self.find_bio_label_type(node)),
+                'sub_tokens': []
+            }
+
+            # Recursively convert each child and append to the 'children' list
+            for child in node.children:
+                node_dict['sub_tokens'].append(tree_to_dict(child))
+
+            return node_dict
+
+
+        tree_dict = tree_to_dict(root_node)
+        with open(name + '.json', 'w') as json_file:
+            json.dump(tree_dict, json_file, indent=4)
 
 #     # source_code = b'''
 #     # for (int i = 0; i < 10; i++) {

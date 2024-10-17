@@ -1,27 +1,8 @@
 from extract_patterns import PatternExtractor
+from label_dictionary import LabelDictionary
 
 
 class TokenLabelFilesGenerator:
-    def __init__(self):
-
-        self.label_types = {"::": "DOUBLECOLON", "--": "DOUBLEMINUS", "++": "DOUBLEPLUS", "false": "BOOL", "true": "BOOL",
-                      "modifier": "MODIFIER", "public": "MODIFIER", "basictype": "TYPE", "null": "IDENT", "keyword": "KEYWORD",
-                       "identifier": "IDENT", "decimalinteger": "NUMBER", "decimalfloatingpoint": "NUMBER",
-                      "string": "STRING", "string_fragment": "STRING",
-                       "(": "LPAR", ")": "RPAR", "[": "LSQB", "]": "RSQB", ",": "COMMA", "?": "CONDITIONOP",
-                      ";": "SEMI", "+": "PLUS", "-": "MINUS", "*": "STAR", "/": "SLASH", ".": "DOT", "=": "EQUAL", ":": "COLON",
-                      "|": "VBAR", "&": "AMPER", "<": "LESS", ">": "GREATER", "%": "PERCENT", "{": "LBRACE", "}": "RBRACE",
-                      "==": "EQEQUAL", "!=": "NOTEQUAL", "<=": "LESSEQUAL", ">=": "GREATEREQUAL", "~": "TILDE",
-                      "^": "CIRCUMFLEX", "\"": "DQUOTES",
-                      "<<": "LEFTSHIFT", ">>": "RIGHTSHIFT", "**": "DOUBLESTAR", "+=": "PLUSEUQAL", "-=": "MINEQUAL",
-                      "*=": "STAREQUAL",
-                      "/=": "SLASHEQUAL", "%=": "PERCENTEQUAL", "&=": "AMPEREQUAL", "|=": "VBAREQUAL", "^=": "CIRCUMFLEXEQUAL",
-                       "<<=": "LEFTSHIFTEQUAL", ">>=": "RIGHTSHIFTEQUAL", "**=": "DOUBLESTAREQUAL", "//": "DOUBLESLASH",
-                       "//=": "DOUBLESLASHEQUAL",
-                       "@": "AT", "@=": "ATEQUAL", "->": "RARROW", "...": "ELLIPSIS", ":=": "COLONEQUAL", "&&": "AND",
-                       "!": "NOT", "||": "OR"}
-
-
     def read_file(self, file_name):
         """
         Helper method that parses the contexts of a text file line by line and returns each element as a separate string.
@@ -48,14 +29,6 @@ class TokenLabelFilesGenerator:
         return strings
 
 
-    def convert_label(self, label):
-        label_l = label.lower()
-        check = label_l in self.label_types
-        if not check:
-            return label.upper()
-        return self.label_types[label.lower()]
-
-
     def write_file(self, file_name, string, tokens, labels):
         """
         Helper method that writes to the .in and .label files.
@@ -71,6 +44,7 @@ class TokenLabelFilesGenerator:
         labels : List[str]
             The list of labels to be parsed through.
         """
+        label_dict = LabelDictionary()
         decreased = False
         prev = 0
         with open(file_name + '.in', 'a') as file_in, open(file_name + '.label', 'a') as file_labels:
@@ -91,6 +65,7 @@ class TokenLabelFilesGenerator:
                 for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
                     file_in.write(token + ' ')
                     file_labels.write(self.convert_label(label[2:]) + ' ')
+                    file_labels.write(label_dict.convert_label(label[2:]) + ' ')
                 file_in.write('\n')
                 file_labels.write('\n')
                 prev = prev + count + 1
@@ -122,9 +97,10 @@ class TokenLabelFilesGenerator:
             self.write_file(file, st, tokens, labels)
 
 
-# def main():
-#     g = TokenLabelFilesGenerator()
-#     g.generate_in_and_label_files('input/newtest.java', 'java')
+    def generate_json_file(self, source_code, language):
+        extractor = PatternExtractor()
+        file = source_code.split('.')[0]
+        strings = self.read_file(source_code)
 
 
 # if __name__ == "__main__":
