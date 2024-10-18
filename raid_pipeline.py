@@ -10,6 +10,7 @@ from app import JavaASTProcessor, ActivationAnnotator
 from extract_patterns import PatternExtractor
 from generate_files import TokenLabelFilesGenerator
 
+
 def main():
     # Set up argument parser
     parser_arg = argparse.ArgumentParser(description='RAID pipeline for processing Java code.')
@@ -18,7 +19,7 @@ def main():
     parser_arg.add_argument('--device', default='cpu', help='Device to run the model on ("cpu" or "cuda").')
     parser_arg.add_argument('--binary_filter', default='set:public,static', help='Binary filter for labeling.')
     parser_arg.add_argument('--output_prefix', default='output', help='Prefix for output files.')
-    parser_arg.add_argument('--depth', default='-1', help='Desired depth of AST to label.')
+    parser_arg.add_argument('--depth', default='-1', help='Desired depth of AST to label.', type=int)
     args = parser_arg.parse_args()
 
     java_file_path = args.file
@@ -51,17 +52,18 @@ def main():
     activation_annotator.process_activations(ast_processor.tokens_tuples, output_dir)
 
     # Extract patterns using PatternExtractor
-    with open(java_file_path, 'r', encoding='utf-8') as f:
-        source_code = f.read().encode('utf-8')
-    pattern_extractor = PatternExtractor()
-    tokens, labels, leaf_labels = pattern_extractor.extract_bio_labels_from_source_code(
-        source_code, 'java'
-    )
+    # with open(java_file_path, 'r', encoding='utf-8') as f:
+    #     source_code = f.read().encode('utf-8')
+    # pattern_extractor = PatternExtractor()
+    # tokens, labels, leaf_labels = pattern_extractor.extract_bio_labels_from_source_code(
+    #     source_code, 'java', args.depth
+    # )
 
     # Generate .in and .label files using TokenLabelFilesGenerator
     generator = TokenLabelFilesGenerator()
     # Generate files based on the Java file
     generator.generate_in_and_label_files(java_file_path, 'java', args.depth)
+
 
 if __name__ == "__main__":
     main()
