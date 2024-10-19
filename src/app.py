@@ -153,8 +153,10 @@ class ActivationAnnotator:
             raise NotImplementedError("Filter must start with 're:' for regex or 'set:' for a set of words.")
 
     def annotate_data(self, tokens_with_depth, activations, output_dir):
-        """Creates binary data and saves it."""
-        tokens_depths, labels, activations = self._create_binary_data(tokens_with_depth, activations, self.binary_filter_compiled, balance_data=True)
+        """Creates binary data and saves it with tokens and labels organized by AST depth."""
+        tokens_depths, labels, activations = self._create_binary_data(
+            tokens_with_depth, activations, self.binary_filter_compiled, balance_data=True
+        )
 
         # Save the files
         words_file = os.path.join(output_dir, f"{self.output_prefix}_tokens.txt")
@@ -162,16 +164,19 @@ class ActivationAnnotator:
         activations_file = os.path.join(output_dir, f"{self.output_prefix}_activations.txt")
 
         with open(words_file, "w", encoding='utf-8') as f_words, open(labels_file, "w", encoding='utf-8') as f_labels:
-            current_depth = -1
+            previous_depth = None
             for (word, depth), label in zip(tokens_depths, labels):
-                # Start a new line if depth decreases
-                if depth <= current_depth:
+                if previous_depth is None:
+                    # First token, no need to write a newline
+                    pass
+                elif depth > previous_depth:
+                    # Depth increased, start a new line
                     f_words.write('\n')
                     f_labels.write('\n')
-                current_depth = depth
                 # Write token and label with a space separator
                 f_words.write(f"{word} ")
                 f_labels.write(f"{label} ")
+                previous_depth = depth
 
         # Save activations to text file (one per line)
         with open(activations_file, 'w', encoding='utf-8') as f:
@@ -184,6 +189,7 @@ class ActivationAnnotator:
         print(f"Words saved to '{words_file}'.")
         print(f"Labels saved to '{labels_file}'.")
         print(f"Activations saved to '{activations_file}'.")
+
 
     def _create_binary_data(self, tokens_with_depth, activations, binary_filter, balance_data=False):
         """Creates a binary labeled dataset based on the binary_filter."""
