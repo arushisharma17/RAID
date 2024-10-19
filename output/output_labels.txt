@@ -1,9 +1,8 @@
-positive negative negative 
-negative 
-positive positive negative negative 
-negative 
-negative 
-negative negative negative negative negative 
-negative negative negative negative negative 
-negative 
-negative negative negative negative negative negative negative 
+negative negative
+positive negative negative
+negative negative
+positive positive negative negative negative negative
+negative negative
+negative negative negative
+negative negative negative negative negative negative negative
+negative negative negative

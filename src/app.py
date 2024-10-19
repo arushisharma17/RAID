@@ -155,8 +155,20 @@ class ActivationAnnotator:
     def annotate_data(self, tokens_with_depth, activations, output_dir):
         """Creates binary data and saves it with tokens and labels organized by AST depth."""
         tokens_depths, labels, activations = self._create_binary_data(
-            tokens_with_depth, activations, self.binary_filter_compiled, balance_data=True
+            tokens_with_depth, activations, self.binary_filter_compiled, balance_data=False
         )
+
+        # Collect tokens and labels by depth
+        from collections import defaultdict
+        depth_to_tokens = defaultdict(list)
+        depth_to_labels = defaultdict(list)
+
+        for (token, depth), label in zip(tokens_depths, labels):
+            depth_to_tokens[depth].append(token)
+            depth_to_labels[depth].append(label)
+
+        # Sort depths to output levels in order
+        sorted_depths = sorted(depth_to_tokens.keys())
 
         # Save the files
         words_file = os.path.join(output_dir, f"{self.output_prefix}_tokens.txt")
@@ -164,21 +176,13 @@ class ActivationAnnotator:
         activations_file = os.path.join(output_dir, f"{self.output_prefix}_activations.txt")
 
         with open(words_file, "w", encoding='utf-8') as f_words, open(labels_file, "w", encoding='utf-8') as f_labels:
-            previous_depth = None
-            for (word, depth), label in zip(tokens_depths, labels):
-                if previous_depth is None:
-                    # First token, no need to write a newline
-                    pass
-                elif depth > previous_depth:
-                    # Depth increased, start a new line
-                    f_words.write('\n')
-                    f_labels.write('\n')
-                # Write token and label with a space separator
-                f_words.write(f"{word} ")
-                f_labels.write(f"{label} ")
-                previous_depth = depth
+            for depth in sorted_depths:
+                tokens_line = ' '.join(depth_to_tokens[depth])
+                labels_line = ' '.join(depth_to_labels[depth])
+                f_words.write(tokens_line + '\n')
+                f_labels.write(labels_line + '\n')
 
-        # Save activations to text file (one per line)
+        # Save activations to text file (order maintained as per tokens_with_depth)
         with open(activations_file, 'w', encoding='utf-8') as f:
             for activation_vector in activations:
                 if isinstance(activation_vector, np.ndarray):
