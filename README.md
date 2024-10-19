@@ -17,11 +17,11 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
 ## How to Run
 In terminal, run the following command:
 ```
-python raid_pipeline.py [filepath to code file] [model] [device] [binary filter] [output prefix] [filepath to code file]
+python raid_pipeline.py [filepath to code file] [model] [device] [binary filter] [output prefix] [aggregation method]
 ```
 An example input:
 ```
-python raid_pipeline.py C:/Users/User/OneDrive/Desktop/SD/RAID/input/sample_input.java --model bert-base-uncased --device cpu --binary_filter 'set:public,static' --output_prefix output --input_text_file C:/Users/User/OneDrive/Desktop/SD/RAID/sample_input.txt
+python raid_pipeline.py C:/Users/User/OneDrive/Desktop/SD/RAID/input/sample_input.java --model bert-base-uncased --device cpu --binary_filter 'set:public,static' --output_prefix output --aggregation_method mean
 ```
 
 
