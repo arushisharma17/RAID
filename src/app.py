@@ -89,12 +89,13 @@ class JavaASTProcessor:
 
 class ActivationAnnotator:
     """Class to handle activation generation and data annotation."""
-    def __init__(self, model_name, device='cpu', binary_filter='set:public,static', output_prefix='output'):
+    def __init__(self, model_name, device='cpu', binary_filter='set:public,static', output_prefix='output', aggregation_method='mean'):
         self.model_name = model_name
         self.device = device
         self.binary_filter = binary_filter
         self.output_prefix = output_prefix
         self.binary_filter_compiled = None
+        self.aggregation_method = aggregation_method
 
     def process_activations(self, tokens_tuples, output_dir):
         """Generates activations, parses them, handles binary filter, and annotates data."""
@@ -110,12 +111,10 @@ class ActivationAnnotator:
         tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
         # Annotate data
         self.annotate_data(tokens_with_depth, activations, output_dir)
-        # Aggregate activations using scalar aggregation
-        token_to_scalar_activation = self.aggregate_activations_scalar(tokens_with_depth, activations)
+        # Aggregate phrase activations
+        phrase_activations = self.aggregate_phrase_activations(tokens_with_depth, activations, method=self.aggregation_method)
         # Output mapping to file
-        self.write_token_activation_mapping(token_to_scalar_activation, output_dir)
-        # Keep the mean vector function for future reference (not used by default)
-        # token_to_mean_activation = self.aggregate_activations(tokens_with_depth, activations)
+        self.write_phrase_activations(phrase_activations, output_dir)
 
     def generate_activations(self, input_file, output_file):
         """Generates activations using the specified transformer model."""
@@ -167,8 +166,8 @@ class ActivationAnnotator:
             depth_to_tokens[depth].append(token)
             depth_to_labels[depth].append(label)
 
-        # Sort depths to output levels in order
-        sorted_depths = sorted(depth_to_tokens.keys())
+        # Determine the maximum depth
+        max_depth = max(depth_to_tokens.keys())
 
         # Save the files
         words_file = os.path.join(output_dir, f"{self.output_prefix}_tokens.txt")
@@ -176,9 +175,10 @@ class ActivationAnnotator:
         activations_file = os.path.join(output_dir, f"{self.output_prefix}_activations.txt")
 
         with open(words_file, "w", encoding='utf-8') as f_words, open(labels_file, "w", encoding='utf-8') as f_labels:
-            for depth in sorted_depths:
-                tokens_line = ' '.join(depth_to_tokens[depth])
-                labels_line = ' '.join(depth_to_labels[depth])
+            # Iterate over all depths from 0 to max_depth
+            for depth in range(max_depth + 1):
+                tokens_line = ' '.join(depth_to_tokens.get(depth, []))
+                labels_line = ' '.join(depth_to_labels.get(depth, []))
                 f_words.write(tokens_line + '\n')
                 f_labels.write(labels_line + '\n')
 
@@ -193,7 +193,6 @@ class ActivationAnnotator:
         print(f"Words saved to '{words_file}'.")
         print(f"Labels saved to '{labels_file}'.")
         print(f"Activations saved to '{activations_file}'.")
-
 
     def _create_binary_data(self, tokens_with_depth, activations, binary_filter, balance_data=False):
         """Creates a binary labeled dataset based on the binary_filter."""
@@ -222,86 +221,54 @@ class ActivationAnnotator:
 
         return list(zip(words, depths)), labels, final_activations
 
-    def aggregate_activations_scalar(self, tokens_with_depth, activations):
-        """Aggregates activations for each token by computing a scalar value."""
-        from collections import defaultdict
-        token_to_activations = defaultdict(list)
-        for (token, depth), activation in zip(tokens_with_depth, activations):
-            token_to_activations[token].append(activation)
-        token_to_scalar_activation = {}
-        for token, activation_list in token_to_activations.items():
-            # Stack activation arrays
-            stacked_activations = np.stack(activation_list)
-            # Compute mean activation vector
-            mean_activation_vector = np.mean(stacked_activations, axis=0)
-            # Compute scalar value (e.g., mean of the mean activation vector)
-            scalar_activation = np.mean(mean_activation_vector)
-            token_to_scalar_activation[token] = scalar_activation
-        return token_to_scalar_activation
+    def aggregate_activation_list(self, activations, method='mean'):
+        """
+        Aggregates a list of activations using the specified method.
+        """
+        activations_array = np.stack(activations)
+        if method == 'mean':
+            return np.mean(activations_array, axis=0)
+        elif method == 'max':
+            return np.max(activations_array, axis=0)
+        elif method == 'sum':
+            return np.sum(activations_array, axis=0)
+        elif method == 'concat':
+            return np.concatenate(activations_array, axis=0)
+        else:
+            raise ValueError("Unsupported aggregation method")
 
-    def write_token_activation_mapping(self, token_to_activation, output_dir):
-        """Writes the token to scalar activation mapping to a JSON file."""
+    def aggregate_phrase_activations(self, tokens_with_depth, activations, method='mean'):
+        """
+        Aggregates token-level activations into phrase-level activations.
+        Phrases are defined as tokens at the same depth level.
+        """
+        from collections import defaultdict
+
+        # Group tokens and activations by depth (phrases)
+        depth_to_activations = defaultdict(list)
+        depth_to_tokens = defaultdict(list)
+        for (token, depth), activation in zip(tokens_with_depth, activations):
+            depth_to_tokens[depth].append(token)
+            depth_to_activations[depth].append(activation)
+
+        # For each depth (phrase), aggregate activations
+        phrase_activations = {}
+        for depth in sorted(depth_to_tokens.keys()):
+            tokens = depth_to_tokens[depth]
+            activations_list = depth_to_activations[depth]
+            # Aggregate activations using the specified method
+            phrase_activation = self.aggregate_activation_list(activations_list, method=method)
+            # Use the tokens as a phrase key (joined tokens)
+            phrase_key = ' '.join(tokens)
+            phrase_activations[phrase_key] = phrase_activation.tolist()  # Convert to list for JSON serialization
+
+        return phrase_activations
+
+    def write_phrase_activations(self, phrase_activations, output_dir):
+        """Writes the phrase activations to a JSON file."""
         # Construct output file path
-        mapping_file = os.path.join(output_dir, f"{self.output_prefix}_scalar_token_activation_mapping.json")
+        mapping_file = os.path.join(output_dir, f"{self.output_prefix}_phrasal_activations.json")
         # Write to file
         with open(mapping_file, 'w', encoding='utf-8') as f:
-            json.dump(token_to_activation, f, indent=2)
-        print(f"Token activation mapping saved to '{mapping_file}'.")
-
-    # Existing mean vector aggregation function (kept for future reference)
-    def aggregate_activations(self, tokens_with_depth, activations):
-        """Aggregates activations for each token by computing the mean activation vector."""
-        from collections import defaultdict
-        token_to_activations = defaultdict(list)
-        for (token, depth), activation in zip(tokens_with_depth, activations):
-            token_to_activations[token].append(activation)
-        token_to_mean_activation = {}
-        for token, activation_list in token_to_activations.items():
-            # Stack activation arrays and compute mean along axis 0
-            mean_activation = np.mean(np.stack(activation_list), axis=0)
-            token_to_mean_activation[token] = mean_activation
-        return token_to_mean_activation
-
-# def main():
-#     # Set up argument parser
-#     parser_arg = argparse.ArgumentParser(description='Parse Java code and generate AST visualization and activations.')
-#     parser_arg.add_argument('file', help='Path to the Java source file.')
-#     parser_arg.add_argument('--model', default='bert-base-uncased', help='Transformer model to use for activations.')
-#     parser_arg.add_argument('--device', default='cpu', help='Device to run the model on ("cpu" or "cuda").')
-#     parser_arg.add_argument('--binary_filter', default='set:public,static', help='Binary filter for labeling.')
-#     parser_arg.add_argument('--output_prefix', default='output', help='Prefix for output files.')
-#     args = parser_arg.parse_args()
-
-#     java_file_path = args.file
-
-#     if not os.path.isfile(java_file_path):
-#         print(f"Error: File '{java_file_path}' does not exist.")
-#         sys.exit(1)
-
-#     # Prepare output directory at the same level as src
-#     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#     output_dir = os.path.join(base_dir, 'output')
-#     if not os.path.exists(output_dir):
-#         os.makedirs(output_dir)
-
-#     # Initialize classes
-#     ast_processor = JavaASTProcessor(java_file_path, output_dir)
-#     activation_annotator = ActivationAnnotator(
-#         model_name=args.model,
-#         device=args.device,
-#         binary_filter=args.binary_filter,
-#         output_prefix=args.output_prefix
-#     )
-
-#     # Process AST and write tokens
-#     ast_processor.process_ast()
-
-#     # Process activations and annotate data
-#     activation_annotator.process_activations(ast_processor.tokens_tuples, output_dir)
-
-#     # Visualize the AST
-#     input_filename = os.path.splitext(os.path.basename(java_file_path))[0]
-#     ast_processor.visualize_ast(input_filename)
-
-# if __name__ == "__main__":
-#     main()
+            json.dump(phrase_activations, f, indent=2)
+        print(f"Phrase activations saved to '{mapping_file}'.")
