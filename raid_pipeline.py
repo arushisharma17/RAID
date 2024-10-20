@@ -19,6 +19,7 @@ def main():
     parser_arg.add_argument('--device', default='cpu', help='Device to run the model on ("cpu" or "cuda").')
     parser_arg.add_argument('--binary_filter', default='set:public,static', help='Binary filter for labeling.')
     parser_arg.add_argument('--output_prefix', default='output', help='Prefix for output files.')
+    parser_arg.add_argument('--aggregation_method', default='mean', help='Aggregation method for activations (mean, max, sum, concat).')
     parser_arg.add_argument('--depth', default='-1', help='Desired depth of AST to label.', type=int)
     args = parser_arg.parse_args()
 
@@ -50,14 +51,6 @@ def main():
         output_prefix=args.output_prefix
     )
     activation_annotator.process_activations(ast_processor.tokens_tuples, output_dir)
-
-    # Extract patterns using PatternExtractor
-    # with open(java_file_path, 'r', encoding='utf-8') as f:
-    #     source_code = f.read().encode('utf-8')
-    # pattern_extractor = PatternExtractor()
-    # tokens, labels, leaf_labels = pattern_extractor.extract_bio_labels_from_source_code(
-    #     source_code, 'java', args.depth
-    # )
 
     # Generate .in and .label files using TokenLabelFilesGenerator
     generator = TokenLabelFilesGenerator()
