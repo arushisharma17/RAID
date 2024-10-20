@@ -122,7 +122,7 @@ class ActivationAnnotator:
             self.model_name,
             input_file,
             output_file,
-            aggregation="average",
+            aggregation="average",  
             output_type="json",
             device=self.device
         )
@@ -136,9 +136,13 @@ class ActivationAnnotator:
         for feature in activation_data['features']:
             token = feature['token'].replace('Ġ', '')
             layers = feature['layers']
-            # Only use activations from the last layer
-            last_layer_values = layers[-1]['values']
-            activations.append(np.array(last_layer_values))
+            # Collect activations from all layers
+            token_activations = []
+            for layer in layers:
+                layer_index = layer['index']
+                layer_values = layer['values']
+                token_activations.append((layer_index, np.array(layer_values)))
+            activations.append(token_activations)
             extracted_tokens.append(token)
         return extracted_tokens, activations
 
@@ -153,7 +157,7 @@ class ActivationAnnotator:
 
     def annotate_data(self, tokens_with_depth, activations, output_dir):
         """Creates binary data and saves it with tokens and labels organized by AST depth."""
-        tokens_depths, labels, activations = self._create_binary_data(
+        tokens_depths, labels, flat_activations = self._create_binary_data(
             tokens_with_depth, activations, self.binary_filter_compiled, balance_data=False
         )
 
@@ -183,11 +187,12 @@ class ActivationAnnotator:
                 f_labels.write(labels_line + '\n')
 
         # Save activations to text file (order maintained as per tokens_with_depth)
+        # Since activations now contain per-layer activations, we can save only the last layer if needed
         with open(activations_file, 'w', encoding='utf-8') as f:
-            for activation_vector in activations:
-                if isinstance(activation_vector, np.ndarray):
-                    activation_vector = activation_vector.tolist()
-                activation_str = ' '.join(map(str, activation_vector))
+            for token_activations in flat_activations:
+                # Get activation from the last layer
+                last_layer_activation = token_activations[-1][1].tolist()
+                activation_str = ' '.join(map(str, last_layer_activation))
                 f.write(activation_str + '\n')
 
         print(f"Words saved to '{words_file}'.")
@@ -210,14 +215,14 @@ class ActivationAnnotator:
         labels = []
         final_activations = []
 
-        for (token, depth), activation in zip(tokens_with_depth, activations):
+        for (token, depth), token_activations in zip(tokens_with_depth, activations):
             words.append(token)
             depths.append(depth)
             if filter_fn(token):
                 labels.append('positive')
             else:
                 labels.append('negative')
-            final_activations.append(activation)
+            final_activations.append(token_activations)
 
         return list(zip(words, depths)), labels, final_activations
 
@@ -245,27 +250,53 @@ class ActivationAnnotator:
         from collections import defaultdict
 
         # Group tokens and activations by depth (phrases)
-        depth_to_activations = defaultdict(list)
         depth_to_tokens = defaultdict(list)
-        for (token, depth), activation in zip(tokens_with_depth, activations):
+        depth_to_activations = defaultdict(list)
+        for (token, depth), token_layers in zip(tokens_with_depth, activations):
             depth_to_tokens[depth].append(token)
-            depth_to_activations[depth].append(activation)
+            depth_to_activations[depth].append(token_layers)  # token_layers is list of (layer_index, activation)
 
-        # For each depth (phrase), aggregate activations
-        phrase_activations = {}
+        # For each depth (phrase), aggregate activations per layer
+        phrase_activations = []
         for depth in sorted(depth_to_tokens.keys()):
             tokens = depth_to_tokens[depth]
-            activations_list = depth_to_activations[depth]
-            # Aggregate activations using the specified method
-            phrase_activation = self.aggregate_activation_list(activations_list, method=method)
+            tokens_layers_list = depth_to_activations[depth]
+
+            # Aggregate activations per layer index
+            layer_to_activations = defaultdict(list)
+            for token_layers in tokens_layers_list:
+                for layer_index, activation in token_layers:
+                    layer_to_activations[layer_index].append(activation)
+
+            # Prepare aggregated layers
+            aggregated_layers = []
+            for layer_index in sorted(layer_to_activations.keys()):
+                activations_list = layer_to_activations[layer_index]
+                # Aggregate activations using the specified method
+                aggregated_activation = self.aggregate_activation_list(activations_list, method=method)
+                aggregated_layers.append({
+                    "index": layer_index,
+                    "values": aggregated_activation.tolist()
+                })
+
             # Use the tokens as a phrase key (joined tokens)
             phrase_key = ' '.join(tokens)
-            phrase_activations[phrase_key] = phrase_activation.tolist()  # Convert to list for JSON serialization
+            phrase_feature = {
+                "phrase": phrase_key,
+                "layers": aggregated_layers
+            }
+            phrase_activations.append(phrase_feature)
 
-        return phrase_activations
+        # Build the output data structure
+        output_data = {
+            "linex_index": 0,
+            "features": phrase_activations
+        }
+
+        return output_data
 
     def write_phrase_activations(self, phrase_activations, output_dir):
-        """Writes the phrase activations to a JSON file."""
+        """Writes the phrase activations to a JSON file in the same format as activations.json."""
         # Construct output file path
         mapping_file = os.path.join(output_dir, f"{self.output_prefix}_phrasal_activations.json")
         # Write to file
