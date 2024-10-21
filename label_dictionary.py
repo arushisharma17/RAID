@@ -18,10 +18,32 @@ class LabelDictionary:
                        "@": "AT", "@=": "ATEQUAL", "->": "RARROW", "...": "ELLIPSIS", ":=": "COLONEQUAL", "&&": "AND",
                        "!": "NOT", "||": "OR"}
 
+        self.keyword_types = {"abstract" : "keyword", "assert" : "keyword", "boolean" : "keyboard", "break" : "keyword",
+                              "byte" : "keyword", "case" : "keyword", "catch" : "keyword", "char" : "keyword",
+                              "class" : "keyword", "const" : "keyword", "continue" : "keyword", "default" : "keyword",
+                              "do" : "keyword", "double" : "keyword", "else" : "keyword", "enum" : "keyword",
+                              "extends" : "keyword", "final" : "keyword", "finally" : "keyword", "float" : "keyword",
+                              "for" : "keyword", "goto" : "keyword", "if" : "keyword", "implements" : "keyword",
+                              "import" : "keyword", "instanceof" : "keyword", "int" : "keyword",
+                              "interface" : "keyword", "long" : "keyword", "native" : "keyword", "new" : "keyword",
+                              "null" : "keyword", "package" : "keyword", "private" : "keyword", "protected" : "keyword",
+                              "public" : "keyword", "return" : "keyword", "short" : "keyword", "static" : "keyword",
+                              "strictfp" : "keyword", "super" : "keyword", "switch" : "keyword",
+                              "synchronized" : "keyword", "this" : "keyword", "throw" : "keyword", "throws" : "keyword",
+                              "transient" : "keyword", "try" : "keyword", "void" : "keyword", "volatile" : "keyword",
+                              "while" : "keyword"}
+
+
+
+
+
 
     def convert_label(self, label):
         label_l = label.lower()
-        check = label_l in self.label_types
-        if not check:
+        check_for_keyword = label_l in self.keyword_types
+        if check_for_keyword:
+            label_l = self.keyword_types[label_l]
+        check_for_label = label_l in self.label_types
+        if not check_for_label:
             return label.upper()
-        return self.label_types[label.lower()]
+        return self.label_types[label_l]
