@@ -36,6 +36,20 @@ class PatternExtractor:
         return 'O'
 
 
+    def search_for_ancestor_type(self, leaf_node, type_to_search):
+        cursor = leaf_node
+        while cursor.parent:
+            if cursor.type == type_to_search:
+                return cursor.type
+            else:
+                cursor = cursor.parent
+        if cursor.type == type_to_search:
+            return cursor.type
+        return leaf_node.type# if leaf_node.type != str(leaf_node.text)[2:-1] else leaf_node.parent.type
+
+
+
+
     def get_nodes_at_level(self, node, target_level) -> List[Node]:
         """
         Extracts nodes at a given number of levels down.
@@ -50,7 +64,7 @@ class PatternExtractor:
         Returns
         -------
         List[Node]
-            A list of knows at the target level down.
+            A list of nodes at the target level down.
         """
 
         def retrieve_nodes(node, target_level, current_level=0):
@@ -65,6 +79,7 @@ class PatternExtractor:
 
             return nodes_at_level
 
+        print('target level:', target_level)
         return retrieve_nodes(node, target_level)
 
 
@@ -101,25 +116,23 @@ class PatternExtractor:
         leaf_labels = []
         bio = []
         prev = None
-        o_type = None
+        b_clause = False
         for i, node in enumerate(leaf_nodes):
             name = self.find_bio_label_type(node)
             leaf_text = str(node.text)[2:-1]
             leaf_labels.append(self.find_label_with_regex(leaf_text) if node.type == 'identifier' else 'O')
 
-            if node.type == leaf_text and i > 0 and (prev != name or o_type is None):
-                if ((language == 'python' and node.parent.child_count == 2)
-                        or (language == 'java' and node.parent.child_count == 3 and node.parent.child(2).type == ';')):
-                    bio.append(leaf_text + ": B" + '-' + name)
-                else:
-                    bio.append(leaf_text + ": O" + '-' + name)
-                prev = None
-                o_type = name
+            if node.child_count == 0 or (node.type == leaf_text and i > 0 and (prev != name)
+                    and len(leaf_text) == 1 and not leaf_labels[-1] == 'single_letter'):
+                bio.append(leaf_text + ": O-" + name)
+                b_clause = False
+            elif i > 0 and b_clause and not (node == node.parent.child(0)):
+                bio.append(leaf_text + ": I-" + name)
             else:
-                bio_type = 'B' if prev != name else 'I'
+                bio_type = 'B'
                 bio.append(leaf_text + ": " + bio_type + '-' + name)
                 prev = name
-                o_type = None
+                b_clause = True
 
         token_data = []
         label_data = []
@@ -140,14 +153,6 @@ class PatternExtractor:
         return token_data, label_data, leaf_labels
 
 
-# def main():
-#     # source_code = b'''
-#     # public class HelloWorld {
-#     #     public static void main(String[] args) {
-#     #         System.out.println("Hello, World!");
-#     #     }
-#     # }
-#     # '''
     def create_tree_json(self, source_code, language, name):
         if language == 'java':
             code_language = Language(tsjava.language())
@@ -180,29 +185,79 @@ class PatternExtractor:
         with open(name + '.json', 'w') as json_file:
             json.dump(tree_dict, json_file, indent=4)
 
-#     # source_code = b'''
-#     # for (int i = 0; i < 10; i++) {
-#     #     System.out.println(i);
-#     # }
-#     # # '''
 
-#     # source_code = b'''
-#     # def add_numbers (a, b):
-#     #     return a + b
-#     # '''
+    def search_for_type(self, source_code, language, node_type=None):
+        if language == 'java':
+            code_language = Language(tsjava.language())
+        elif language == 'python':
+            code_language = Language(tspython.language())
+        else:
+            print("Please pick Java or Python as a language.")
+            return
+        parser = Parser(code_language)
+        label_dictionary = LabelDictionary()
 
-#     # source_code = b'''
-#     # # Comment about function
-#     # '''
+        tree = parser.parse(source_code)
+        root_node = tree.root_node
+        leaf_nodes = self.get_nodes_at_level(root_node, -1)
+        tokens = []
+        bio = []
+        prev = None
+        for node in leaf_nodes:
+            tokens.append(str(node.text)[2:-1])
+            label_type = self.search_for_ancestor_type(node, node_type)
+            if label_type == node_type:
+                bio_label = 'I' if prev == label_type else 'B'
+            else:
+                bio_label = 'O'
+            bio.append(bio_label + '-' + label_dictionary.convert_label(label_type))
+            prev = label_type
+        bio[-1] = 'O' + bio[-1][1:]  # last label is always O
 
-#     source_code = b'''
-#     public int addNumbers(a, b) {
-#         return a + b;
-#     }
-#     '''
-#     e = PatternExtractor()
-#     e.extract_bio_labels_from_source_code(source_code, 'java')
+        data = {"TOKEN": tokens,
+                "LABEL": bio}
+
+        df = pd.DataFrame(data)
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            print(df)
+        print('\n')
 
 
-# if __name__ == "__main__":
-#     main()
+def main():
+    # could try splitting into an array by '\n', that could make it easier for leaves at least?
+    source_code = b'''
+    public class HelloWorld {
+        public static void main(String[] args) {
+            System.out.println("Hello, World!");
+        }
+    }
+    '''
+
+    # source_code = b'''
+    # for (int i = 0; i < 10; i++) {
+    #     System.out.println(i);
+    # }
+    # # '''
+
+    # source_code = b'''
+    # def add_numbers (a, b):
+    #     return a + b
+    # '''
+
+    # source_code = b'''
+    # # Comment about function
+    # '''
+
+    # source_code = b'''
+    # public int addNumbers(a, b) {
+    #     return a + b;
+    # }
+    # '''
+    e = PatternExtractor()
+    # e.extract_bio_labels_from_source_code(source_code, 'java')
+    e.search_for_type(source_code, 'java', 'class_body')
+    # e.create_tree_json(source_code, 'java', 'test')
+
+
+if __name__ == "__main__":
+    main()
