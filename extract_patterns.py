@@ -23,6 +23,10 @@ class PatternExtractor:
             'numeric': '^[a-zA-Z].+[0-9]+$',
         }
 
+        self.non_leaf_types = ['program', 'class_declaration', 'class_body',
+                               'method_declaration', 'formal_parameters',
+                               'block', 'method_invocation']
+
 
     def check_token(self, token, regex):
         pattern = self.cases[regex]
@@ -79,7 +83,7 @@ class PatternExtractor:
 
             return nodes_at_level
 
-        print('target level:', target_level)
+        # print('target level:', target_level)
         return retrieve_nodes(node, target_level)
 
 
@@ -186,7 +190,29 @@ class PatternExtractor:
             json.dump(tree_dict, json_file, indent=4)
 
 
-    def search_for_type(self, source_code, language, node_type=None):
+    def search_for_type(self, node_type, leaf_nodes, label_dictionary):
+        bio = []
+        prev = None
+        for node in leaf_nodes:
+            label_type = self.search_for_ancestor_type(node, node_type)
+            if label_type == node_type:
+                bio_label = 'I' if prev == label_type else 'B'
+            else:
+                bio_label = 'O'
+            bio.append(bio_label + '-' + label_dictionary.convert_label(label_type))
+
+            if prev == node_type and prev != label_type:
+                bio[-2] = 'O' + bio[-2][1:]  # last label is always O
+
+            prev = label_type
+
+        if prev == node_type:
+            bio[-1] = 'O' + bio[-1][1:]  # last label is always O
+
+        return bio
+
+
+    def get_all_bio_labels(self, source_code, language):
         if language == 'java':
             code_language = Language(tsjava.language())
         elif language == 'python':
@@ -196,26 +222,18 @@ class PatternExtractor:
             return
         parser = Parser(code_language)
         label_dictionary = LabelDictionary()
-
         tree = parser.parse(source_code)
         root_node = tree.root_node
         leaf_nodes = self.get_nodes_at_level(root_node, -1)
-        tokens = []
-        bio = []
-        prev = None
-        for node in leaf_nodes:
-            tokens.append(str(node.text)[2:-1])
-            label_type = self.search_for_ancestor_type(node, node_type)
-            if label_type == node_type:
-                bio_label = 'I' if prev == label_type else 'B'
-            else:
-                bio_label = 'O'
-            bio.append(bio_label + '-' + label_dictionary.convert_label(label_type))
-            prev = label_type
-        bio[-1] = 'O' + bio[-1][1:]  # last label is always O
 
-        data = {"TOKEN": tokens,
-                "LABEL": bio}
+        data = {
+            'TOKEN': [str(node.text)[2:-1] for node in leaf_nodes],
+            'REGEX': [self.find_label_with_regex(str(node.text)[2:-1]) for node in leaf_nodes]
+        }
+
+        for non_leaf_type in self.non_leaf_types:
+            bio = self.search_for_type(non_leaf_type, leaf_nodes, label_dictionary)
+            data[non_leaf_type.upper()] = bio
 
         df = pd.DataFrame(data)
         with pd.option_context('display.max_rows', None, 'display.max_columns', None):
@@ -223,41 +241,42 @@ class PatternExtractor:
         print('\n')
 
 
-def main():
-    # could try splitting into an array by '\n', that could make it easier for leaves at least?
-    source_code = b'''
-    public class HelloWorld {
-        public static void main(String[] args) {
-            System.out.println("Hello, World!");
-        }
-    }
-    '''
-
-    # source_code = b'''
-    # for (int i = 0; i < 10; i++) {
-    #     System.out.println(i);
-    # }
-    # # '''
-
-    # source_code = b'''
-    # def add_numbers (a, b):
-    #     return a + b
-    # '''
-
-    # source_code = b'''
-    # # Comment about function
-    # '''
-
-    # source_code = b'''
-    # public int addNumbers(a, b) {
-    #     return a + b;
-    # }
-    # '''
-    e = PatternExtractor()
-    # e.extract_bio_labels_from_source_code(source_code, 'java')
-    e.search_for_type(source_code, 'java', 'class_body')
-    # e.create_tree_json(source_code, 'java', 'test')
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     # could try splitting into an array by '\n', that could make it easier for leaves at least?
+#     source_code = b'''
+#     public class HelloWorld {
+#         public static void main(String[] args) {
+#             System.out.println("Hello, World!");
+#         }
+#     }
+#     '''
+#
+#     # source_code = b'''
+#     # for (int i = 0; i < 10; i++) {
+#     #     System.out.println(i);
+#     # }
+#     # # '''
+#
+#     # source_code = b'''
+#     # def add_numbers (a, b):
+#     #     return a + b
+#     # '''
+#
+#     # source_code = b'''
+#     # # Comment about function
+#     # '''
+#
+#     # source_code = b'''
+#     # public int addNumbers(a, b) {
+#     #     return a + b;
+#     # }
+#     # '''
+#     e = PatternExtractor()
+#     # e.extract_bio_labels_from_source_code(source_code, 'java')
+#
+#     e.get_all_bio_labels(source_code, 'java')
+#     # e.create_tree_json(source_code, 'java', 'test')
+#
+#
+# if __name__ == "__main__":
+#     main()
