@@ -212,7 +212,7 @@ class PatternExtractor:
         return bio
 
 
-    def get_all_bio_labels(self, source_code, language):
+    def get_all_bio_labels(self, source_code, language, file_name):
         if language == 'java':
             code_language = Language(tsjava.language())
         elif language == 'python':
@@ -239,6 +239,8 @@ class PatternExtractor:
         with pd.option_context('display.max_rows', None, 'display.max_columns', None):
             print(df)
         print('\n')
+
+        df.to_csv('output/' + file_name + '.csv', index=False)
 
 
 # def main():
