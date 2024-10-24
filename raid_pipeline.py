@@ -20,7 +20,7 @@ def main():
     parser_arg.add_argument('--binary_filter', default='set:public,static', help='Binary filter for labeling.')
     parser_arg.add_argument('--output_prefix', default='output', help='Prefix for output files.')
     parser_arg.add_argument('--aggregation_method', default='mean', help='Aggregation method for activations (mean, max, sum, concat).')
-    parser_arg.add_argument('--depth', default='-1', help='Desired depth of AST to label.', type=int)
+    parser_arg.add_argument('--label', default='leaves', help='Desired non-leaf type to categorize tokens.')
     args = parser_arg.parse_args()
 
     java_file_path = args.file
@@ -55,7 +55,7 @@ def main():
     # Generate .in and .label files using TokenLabelFilesGenerator
     generator = TokenLabelFilesGenerator()
     # Generate files based on the Java file
-    generator.generate_in_and_label_files(java_file_path, 'java', args.depth)
+    generator.generate_in_and_label_files(java_file_path, 'java', args.label)
 
 
 if __name__ == "__main__":
