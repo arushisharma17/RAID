@@ -23,9 +23,7 @@ class PatternExtractor:
             'numeric': '^[a-zA-Z].+[0-9]+$',
         }
 
-        self.non_leaf_types = ['program', 'class_declaration', 'class_body',
-                               'method_declaration', 'formal_parameters',
-                               'block', 'method_invocation']
+
 
 
     def check_token(self, token, regex):
@@ -231,7 +229,7 @@ class PatternExtractor:
             'REGEX': [self.find_label_with_regex(str(node.text)[2:-1]) for node in leaf_nodes]
         }
 
-        for non_leaf_type in self.non_leaf_types:
+        for non_leaf_type in label_dictionary.non_leaf_types:
             bio = self.search_for_type(non_leaf_type, leaf_nodes, label_dictionary)
             data[non_leaf_type.upper()] = bio
 
@@ -240,7 +238,7 @@ class PatternExtractor:
             print(df)
         print('\n')
 
-        df.to_csv('output/' + file_name + '.csv', index=False)
+        df.to_csv(file_name + '.csv', index=False)
 
 
 # def main():

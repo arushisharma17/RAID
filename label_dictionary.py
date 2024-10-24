@@ -33,6 +33,10 @@ class LabelDictionary:
                               "transient" : "keyword", "try" : "keyword", "void" : "keyword", "volatile" : "keyword",
                               "while" : "keyword"}
 
+        self.non_leaf_types = {'program' : 2, 'class_declaration' : 3, 'class_body' : 4,
+                               'method_declaration' : 5, 'formal_parameters' : 6,
+                               'block' : 7, 'method_invocation' : 8, 'leaves' : 9}
+
 
 
 

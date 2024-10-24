@@ -1,3 +1,5 @@
+import csv
+
 from extract_patterns import PatternExtractor
 from label_dictionary import LabelDictionary
 import os
@@ -79,7 +81,7 @@ class TokenLabelFilesGenerator:
             file_bio.write('\n')
 
 
-    def generate_in_and_label_files(self, source_file, language, depth=-1):
+    def generate_in_and_label_files(self, source_file, language, label_type):
         """
         Generates .in and .label files for the given text file.
 
@@ -92,17 +94,32 @@ class TokenLabelFilesGenerator:
         depth : int
             The desired depth of the AST tree to parse.
         """
-        extractor = PatternExtractor()
-        strings = self.read_file(source_file)
+        label_dictionary = LabelDictionary()
         file_name = 'output/' + os.path.basename(source_file).split('.')[0]
+        tokens = []
+        bio_labels = []
         with (open(file_name + '.in', 'w') as file_in, open(file_name + '.label', 'w') as file_label,
               open(file_name + '.bio', 'w') as file_bio):
             file_in.write('')
             file_label.write('')
             file_bio.write('')
+
+        if not os.path.isfile('output/' + file_name + '.csv'):
+            extractor = PatternExtractor()
+            strings = self.read_file(source_file)
+            for st in strings:
+                extractor.get_all_bio_labels(bytes(st, encoding='utf8'), language, file_name)
+
+        with open(file_name + '.csv', mode='r') as file:
+            csv_file = csv.reader(file)
+            for i, lines in enumerate(csv_file):
+                if i == 0:
+                    continue
+                tokens.append(lines[0])
+                bio_labels.append(lines[label_dictionary.non_leaf_types[label_type]])
+
         for st in strings:
-            tokens, labels, _ = extractor.extract_bio_labels_from_source_code(bytes(st, encoding='utf8'), language, depth)
-            self.write_file(file_name, st, tokens, labels)
+            self.write_file(file_name, st, tokens, bio_labels)
 
 
     def generate_json_file(self, source_file, language):
@@ -112,6 +129,11 @@ class TokenLabelFilesGenerator:
         code = '\n'.join(strings)
         extractor.create_tree_json(bytes(code, encoding='utf8'), language, file_name)
 
+
+def main():
+    g = TokenLabelFilesGenerator()
+    g.generate_in_and_label_files('input/newtest.java', 'java', 'program')
+    # g.generate_json_file('input/sample_input.java', 'java')
 
 
 # if __name__ == "__main__":
