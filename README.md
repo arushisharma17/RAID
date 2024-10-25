@@ -23,7 +23,7 @@ An example input:
 ```
 python raid_pipeline.py C:/Users/User/OneDrive/Desktop/SD/RAID/input/sample_input.java --model bert-base-uncased --device cpu --binary_filter 'set:public,static' --output_prefix output --aggregation_method mean --label class_body
 ```
-
+Allowed commands for --label are: program, class_declaration, class_body, method_declaration, formal_parameters, block, method_invocation, leaves
 
 ## Link to Colab notebook for tutorial and intial instructions
 
