@@ -6,7 +6,7 @@ import argparse
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 # Import necessary classes from other modules
-from app import JavaASTProcessor, ActivationAnnotator
+from ast_token_activator import JavaASTProcessor, ActivationAnnotator
 from extract_patterns import PatternExtractor
 from generate_files import TokenLabelFilesGenerator
 
