@@ -23,11 +23,7 @@ class TokenLabelFilesGenerator:
             strings = []
             st = ''
             for line in file:
-                if line != '\n':
-                    st += line
-                elif line != '\n':
-                    strings.append(st.strip())
-                    st = ''
+                st += line
             strings.append(st)
         return strings
 
@@ -55,6 +51,11 @@ class TokenLabelFilesGenerator:
             lines = string.split('\n')
             token_index = 0
             for line in lines:
+                if line == '':
+                    file_in.write('\n')
+                    file_labels.write('\n')
+                    file_bio.write('\n')
+                    continue
                 for count, t in enumerate(tokens[prev:]):
                     ti = line.find(t, token_index)
                     if ti >= token_index:
@@ -76,9 +77,6 @@ class TokenLabelFilesGenerator:
                 prev = prev + count + 1
                 token_index = 0
                 decreased = False
-            file_in.write('\n')
-            file_labels.write('\n')
-            file_bio.write('\n')
 
 
     def generate_in_label_bio_files(self, source_file, language, label_type):
@@ -91,8 +89,8 @@ class TokenLabelFilesGenerator:
             The text file containing elements to be written to the .in and .label files.
         language : str
             The language to extra labels in.
-        depth : int
-            The desired depth of the AST tree to parse.
+        label_type : str
+            The desired label (non-leaf) to be parsed.
         """
         label_dictionary = LabelDictionary()
         file_name = 'output/' + os.path.basename(source_file).split('.')[0]
@@ -142,8 +140,8 @@ class TokenLabelFilesGenerator:
 
 def main():
     g = TokenLabelFilesGenerator()
-    g.generate_in_label_bio_files('input/multistub.java', 'java', 'test')
-    # g.generate_json_file('input/sample_input.java', 'java')
+    g.generate_in_label_bio_files('input/small-src-chunck1.txt', 'java', 'class_body')
+    g.generate_json_file('input/small-src-chunck1.txt', 'java')
 
 
 if __name__ == "__main__":
