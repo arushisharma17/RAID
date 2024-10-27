@@ -55,7 +55,7 @@ def main():
     # Generate .in and .label files using TokenLabelFilesGenerator
     generator = TokenLabelFilesGenerator()
     # Generate files based on the Java file
-    generator.generate_in_and_label_files(java_file_path, 'java', args.label)
+    generator.generate_in_label_bio_files(java_file_path, 'java', args.label)
 
 
 if __name__ == "__main__":

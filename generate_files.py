@@ -81,9 +81,9 @@ class TokenLabelFilesGenerator:
             file_bio.write('\n')
 
 
-    def generate_in_and_label_files(self, source_file, language, label_type):
+    def generate_in_label_bio_files(self, source_file, language, label_type):
         """
-        Generates .in and .label files for the given text file.
+        Generates .in, .label, and .bio files for the given text file.
 
         Parameters
         ----------
@@ -123,6 +123,16 @@ class TokenLabelFilesGenerator:
 
 
     def generate_json_file(self, source_file, language):
+        """
+        Generates .json file for the given file, listing tokens, their labels, and children recursively.
+
+        Parameters
+        ----------
+        source_file : str
+            The text file containing elements to be written to the .in and .label files.
+        language : str
+            The language to extra labels in.
+        """
         extractor = PatternExtractor()
         file_name = 'output/' + os.path.basename(source_file).split('.')[0]
         strings = self.read_file(source_file)
@@ -132,9 +142,9 @@ class TokenLabelFilesGenerator:
 
 def main():
     g = TokenLabelFilesGenerator()
-    g.generate_in_and_label_files('input/newtest.java', 'java', 'program')
+    g.generate_in_label_bio_files('input/multistub.java', 'java', 'test')
     # g.generate_json_file('input/sample_input.java', 'java')
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

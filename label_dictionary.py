@@ -38,10 +38,6 @@ class LabelDictionary:
                                'block' : 7, 'method_invocation' : 8, 'leaves' : 9}
 
 
-
-
-
-
     def convert_label(self, label):
         label_l = label.lower()
         check_for_keyword = label_l in self.keyword_types
