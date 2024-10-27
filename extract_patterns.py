@@ -89,9 +89,10 @@ class PatternExtractor:
         return node.grammar_name
 
 
-    def extract_bio_labels_from_source_code(self, source_code, language, depth=-1):
+    def extract_bio_labels_from_layer(self, source_code, language, depth=-1):
         """
-        Parses the source code, then generates and displays the separate tokens and labels
+        Parses the source code, then generates and displays the separate tokens and labels for a specific layer.
+        Ignores specific labels.
 
         Parameters
         ----------
@@ -156,6 +157,18 @@ class PatternExtractor:
 
 
     def create_tree_json(self, source_code, language, name):
+        """
+        Generates JSON in tree format of tokens and labels for source code.
+
+        Parameters
+        ----------
+        source_code : bytes
+            The code snippet to be parsed.
+        language : str
+            The language in which the code snippet should be parsed.
+        name : str
+            The desired name of the json file.
+        """
         if language == 'java':
             code_language = Language(tsjava.language())
         elif language == 'python':
@@ -189,6 +202,23 @@ class PatternExtractor:
 
 
     def search_for_type(self, node_type, leaf_nodes, label_dictionary):
+        """
+        For the given node type, returns list of labels for all leaves.
+
+        Parameters
+        ----------
+        node_type : str
+            The node type (non-leaf) to be parsed.
+        leaf_nodes : List[Node]
+            The list of leaf nodes.
+        label_dictionary : LabelDictionary
+            Label dictionary to be used for converting labels to desired format.
+
+        Returns
+        -------
+        List[str]
+            A list of labels with BIO label and parameter for each leaf.
+        """
         bio = []
         prev = None
         for node in leaf_nodes:
@@ -211,6 +241,18 @@ class PatternExtractor:
 
 
     def get_all_bio_labels(self, source_code, language, file_name):
+        """
+        For all non-leaf labels, generates BIO labels with parameters for tokens and sends to CSV file.
+
+        Parameters
+        ----------
+        source_code : bytes
+            The source code to be parsed.
+        language : str
+            Language for the source code to be parsed in.
+        file_name : str
+            File name for generated CSV.
+        """
         if language == 'java':
             code_language = Language(tsjava.language())
         elif language == 'python':
