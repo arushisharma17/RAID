@@ -7,7 +7,7 @@ from unittest.mock import patch, Mock
 from tree_sitter import Node, Tree
 
 # Import the classes to test
-from ast_token_activator import JavaASTProcessor, ActivationAnnotator
+from RAID.raid.ast_token_activator import JavaASTProcessor, ActivationAnnotator
 
 class TestJavaASTProcessor(unittest.TestCase):
     def setUp(self):
