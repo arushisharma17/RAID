@@ -15,7 +15,7 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
 
 ## Temp Installation Instructions
 
-Install RAID from TestPyPI:
+Install RAID from TestPyPI, and its NeuroX dependency:
 
 ```bash
 pip install -i https://test.pypi.org/simple/ raid==1.0.0
