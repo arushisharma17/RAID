@@ -12,6 +12,23 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
    c. CFG, DFG, AST Nesting/Parent-child relationships, etc -Hierarchical
    d. SE datasets, Ontologies, Design Patterns - Semantic
    e. Regular Expressions to create datasets, filter datasets, edit datasets.
+
+## Temp Installation Instructions
+
+Install RAID from TestPyPI:
+
+```bash
+pip install -i https://test.pypi.org/simple/ raid==1.0.0
+pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7
+```
+
+### Usage
+
+Run RAID on a Java file:
+
+```bash
+raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body
+```
    
 
 ## How to Run
