@@ -113,6 +113,9 @@ setup(
         "typing_extensions==4.12.2",
         "tzdata==2024.2",
     ],
+    dependency_links=[
+        "git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7#egg=neurox"
+    ],
     entry_points={
         'console_scripts': [
             'raid=raid_pipeline:main',
