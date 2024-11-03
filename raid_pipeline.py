@@ -3,7 +3,7 @@ import sys
 import argparse
 
 # Add the 'src' directory to sys.path to allow module imports
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+# sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 # Import necessary classes from other modules
 from ast_token_activator import JavaASTProcessor, ActivationAnnotator
