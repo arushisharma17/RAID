@@ -118,7 +118,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'raid=raid_pipeline:main',
+            'raid=raid.raid_pipeline:main',
         ],
     },
     python_requires=">=3.6",
