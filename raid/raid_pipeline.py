@@ -39,9 +39,9 @@ def main():
     ast_processor = JavaASTProcessor(java_file_path, output_dir)
     ast_processor.process_ast()
 
-    # Visualize the AST
-    input_filename = os.path.splitext(os.path.basename(java_file_path))[0]
-    ast_processor.visualize_ast(input_filename)
+    # Comment out AST visualization
+    # input_filename = os.path.splitext(os.path.basename(java_file_path))[0]
+    # ast_processor.visualize_ast(input_filename)
 
     # Process activations and annotate data
     activation_annotator = ActivationAnnotator(

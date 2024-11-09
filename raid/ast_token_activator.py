@@ -8,7 +8,7 @@ from typing import Pattern
 
 from tree_sitter import Parser, Language
 import tree_sitter_java as tsjava
-import graphviz
+# import graphviz
 
 # Import NeuroX transformers extractor
 import neurox.data.extraction.transformers_extractor as transformers_extractor
@@ -69,23 +69,23 @@ class JavaASTProcessor:
         for token_type, token_text, depth in self.tokens_tuples:
             print(f"Type: {token_type}, Text: {token_text}, Depth: {depth}")
 
-    def visualize_ast(self, input_filename):
-        """Visualizes the AST and saves it as a PNG file."""
-        graph = graphviz.Digraph(format='png')
-        self._visualize_ast(self.root_node, graph)
-        ast_output_path = os.path.join(self.output_dir, f'{input_filename}_ast')
-        graph.render(ast_output_path, format='png', cleanup=True)
-        print(f"\nAST visualization saved as '{ast_output_path}.png'.")
+    # def visualize_ast(self, input_filename):
+    #     """Visualizes the AST and saves it as a PNG file."""
+    #     graph = graphviz.Digraph(format='png')
+    #     self._visualize_ast(self.root_node, graph)
+    #     ast_output_path = os.path.join(self.output_dir, f'{input_filename}_ast')
+    #     graph.render(ast_output_path, format='png', cleanup=True)
+    #     print(f"\nAST visualization saved as '{ast_output_path}.png'.")
 
-    def _visualize_ast(self, node, graph, parent_id=None):
-        """Helper method for visualizing the AST."""
-        node_id = str(id(node))
-        label = f"{node.type} [{node.start_point}-{node.end_point}]"
-        graph.node(node_id, label)
-        if parent_id:
-            graph.edge(parent_id, node_id)
-        for child in node.children:
-            self._visualize_ast(child, graph, node_id)
+    # def _visualize_ast(self, node, graph, parent_id=None):
+    #     """Helper method for visualizing the AST."""
+    #     node_id = str(id(node))
+    #     label = f"{node.type} [{node.start_point}-{node.end_point}]"
+    #     graph.node(node_id, label)
+    #     if parent_id:
+    #         graph.edge(parent_id, node_id)
+    #     for child in node.children:
+    #         self._visualize_ast(child, graph, node_id)
 
 class ActivationAnnotator:
     """Class to handle activation generation and data annotation."""
