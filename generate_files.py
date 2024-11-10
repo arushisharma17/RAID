@@ -1,9 +1,12 @@
 import csv
+import re
+import time
 
 from extract_patterns import PatternExtractor
 from label_dictionary import LabelDictionary
 import os
 
+start_time = time.time()
 
 class TokenLabelFilesGenerator:
     def read_file(self, file_name):
@@ -19,10 +22,12 @@ class TokenLabelFilesGenerator:
         List[str]
             A list of each element in the given text file.
         """
-        with open(file_name) as file:
+        with open(file_name, encoding="utf-8") as file:
             strings = []
             st = ''
             for line in file:
+                line = re.sub(r'[^\x00-\x7F]+', '', line)
+                # line = line.decode('utf-8', 'ignore').encode("utf-8")
                 st += line
             strings.append(st)
         return strings
@@ -43,40 +48,71 @@ class TokenLabelFilesGenerator:
         labels : List[str]
             The list of labels to be parsed through.
         """
-        label_dict = LabelDictionary()
-        decreased = False
         prev = 0
+        token_index = 0
+        token_str = ''
+        token_iter = iter(tokens)
+        cut_to_next_line = True
         with (open(file_name + '.in', 'a') as file_in, open(file_name + '.label', 'a') as file_labels,
               open(file_name + '.bio', 'w') as file_bio):
             lines = string.split('\n')
-            token_index = 0
-            for line in lines:
-                if line == '':
+            line_enum = iter(lines)
+            for i, line in enumerate(line_enum):
+                if i == 5:
+                    pass
+                print(i)
+                if len(line.strip()) == 0:
                     file_in.write('\n')
                     file_labels.write('\n')
-                    file_bio.write('\n')
+                    file_labels.write('\n')
                     continue
-                for count, t in enumerate(tokens[prev:]):
-                    ti = line.find(t, token_index)
-                    if ti >= token_index:
-                        token_index = ti + 1
-                    else:
-                        if count >= 2:
-                            count = count - 1
-                            decreased = True
+                elif line.lstrip()[:2] == '/*' and len(tokens[prev:token_index+1]) > 0:
+                    file_in.write(' '.join(tokens[prev:token_index+1]).strip() + '\n')
+                    file_labels.write(' '.join(label[2:] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
+                    file_bio.write(' '.join(label[0] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
+                    token_str = ''
+                    for it in range(''.join(tokens[prev:token_index+1]).count('\n')):
+                        next(line_enum)
+                    prev = token_index + 1
+                    token_index += 1
+                    next(token_iter)
+                    continue
+                line = line.replace(" ", "")
+                while abs(prev - token_index < 500):  # temp condition
+                    t = next(token_iter)
+                    token_index += 1
+                    stripped_t = t.replace(" ", "")
+                    if stripped_t.startswith('\\\\') and len(stripped_t) > 2:
+                        stripped_t = stripped_t.replace('\\\\', '\\')
+                    token_str += stripped_t
+                    test_token_str = token_str.replace('\\', '').strip()
+                    test_line = line.replace('\\', '').strip().replace('\t', '')
+                    t_count = t.count('\n')
+                    if t_count > 0:
+                        for it in range(t_count-1):
+                            next(line_enum)
+                        cut_to_next_line = line in t or line == token_str[:token_str.find('\n')]
                         break
-                if count == 1 and not decreased:
-                    count = count - 1
-                for (token, label) in zip(tokens[prev:prev + count + 1], labels[prev:prev + count + 1]):
-                    file_in.write(token + ' ')
-                    file_labels.write(label_dict.convert_label(label[2:]) + ' ')
-                    file_bio.write(label[0] + ' ')
-                file_in.write('\n')
-                file_labels.write('\n')
-                file_bio.write('\n')
-                prev = prev + count + 1
-                token_index = 0
-                decreased = False
+                    elif test_line.endswith(test_token_str):
+                        if not test_line.startswith(test_token_str) or test_line == test_token_str:
+                            cut_to_next_line = True
+                            break
+                    elif len(test_token_str) > len(test_line):
+                        cut_to_next_line = True
+                        break
+                file_in.write(' '.join(tokens[prev:token_index]) + ' ')
+                file_labels.write(' '.join(label[2:] for label in labels[prev:token_index]) + ' ')
+                file_bio.write(' '.join(label[0] for label in labels[prev:token_index]) + ' ')
+                print(f'{token_str}\nVS\n{line}')
+                print('line break', cut_to_next_line)
+                if cut_to_next_line:
+                    file_in.write('\n')
+                    file_labels.write('\n')
+                    file_labels.write('\n')
+                if token_str.find('\n') > -1 and cut_to_next_line:
+                    next(line_enum)
+                token_str = ''
+                prev = token_index
 
 
     def generate_in_label_bio_files(self, source_file, language, label_type):
@@ -102,22 +138,35 @@ class TokenLabelFilesGenerator:
             file_label.write('')
             file_bio.write('')
 
-        if not os.path.isfile('output/' + file_name + '.csv'):
+
+        strings = self.read_file(source_file)
+
+        if not os.path.isfile(file_name + '.csv'):
+            print("No CSV Found")
             extractor = PatternExtractor()
-            strings = self.read_file(source_file)
+            # strings = self.read_file(source_file)
             for st in strings:
                 extractor.get_all_bio_labels(bytes(st, encoding='utf8'), language, file_name)
+        print("CSV Finished")
+        elapsed_time = time.time() - start_time
+        print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
         with open(file_name + '.csv', mode='r') as file:
             csv_file = csv.reader(file)
-            for i, lines in enumerate(csv_file):
-                if i == 0:
-                    continue
+            iter_csv = iter(csv_file)
+            next(iter_csv)
+            for i, lines in enumerate(iter_csv):
                 tokens.append(lines[0])
                 bio_labels.append(lines[label_dictionary.non_leaf_types[label_type]])
+        print("Appending Finished")
+        elapsed_time = time.time() - start_time
+        print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
         for st in strings:
             self.write_file(file_name, st, tokens, bio_labels)
+        print("Writing Finished")
+        elapsed_time = time.time() - start_time
+        print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
 
     def generate_json_file(self, source_file, language):
@@ -140,8 +189,12 @@ class TokenLabelFilesGenerator:
 
 def main():
     g = TokenLabelFilesGenerator()
-    g.generate_in_label_bio_files('input/small-src-chunck1.txt', 'java', 'class_body')
-    g.generate_json_file('input/small-src-chunck1.txt', 'java')
+    print("Generating In/Label/Bio")
+    elapsed_time = time.time() - start_time
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    g.generate_in_label_bio_files('input/source-code-cleaned.txt', 'java', 'program')
+    # g.generate_in_label_bio_files('input/for.txt', 'java', 'program')
+    # g.generate_json_file('input/small-src-chunck1.txt', 'java')
 
 
 if __name__ == "__main__":
