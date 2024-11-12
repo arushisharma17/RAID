@@ -185,17 +185,3 @@ class TokenLabelFilesGenerator:
         strings = self.read_file(source_file)
         code = '\n'.join(strings)
         extractor.create_tree_json(bytes(code, encoding='utf8'), language, file_name)
-
-
-def main():
-    g = TokenLabelFilesGenerator()
-    print("Generating In/Label/Bio")
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time: {elapsed_time:.2f} seconds")
-    g.generate_in_label_bio_files('input/source-code-cleaned.txt', 'java', 'program')
-    # g.generate_in_label_bio_files('input/for.txt', 'java', 'program')
-    # g.generate_json_file('input/small-src-chunck1.txt', 'java')
-
-
-if __name__ == "__main__":
-    main()
