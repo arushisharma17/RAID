@@ -111,6 +111,8 @@ class ActivationAnnotator:
         tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
         # Annotate data
         self.annotate_data(tokens_with_depth, activations, output_dir)
+        # Write aggregated activations
+        self.write_aggregated_activations(activations, output_dir)
         # Aggregate phrase activations
         phrase_activations = self.aggregate_phrase_activations(tokens_with_depth, activations, method=self.aggregation_method)
         # Output mapping to file
@@ -303,3 +305,20 @@ class ActivationAnnotator:
         with open(mapping_file, 'w', encoding='utf-8') as f:
             json.dump(phrase_activations, f, indent=2)
         print(f"Phrase activations saved to '{mapping_file}'.")
+
+    def write_aggregated_activations(self, activations, output_dir):
+        """Writes the mean-aggregated activations across all layers to a file."""
+        # Construct output file path
+        aggregated_file = os.path.join(output_dir, f"{self.output_prefix}_aggregated_activations.txt")
+        
+        with open(aggregated_file, 'w', encoding='utf-8') as f:
+            for token_activations in activations:
+                # Get activations from all layers for this token
+                layer_activations = [layer[1] for layer in token_activations]
+                # Aggregate across layers using the specified method
+                aggregated = self.aggregate_activation_list(layer_activations, method=self.aggregation_method)
+                # Convert to string and write
+                activation_str = ' '.join(map(str, aggregated.tolist()))
+                f.write(activation_str + '\n')
+        
+        print(f"Aggregated activations saved to '{aggregated_file}'.")
