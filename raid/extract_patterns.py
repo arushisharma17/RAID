@@ -1,3 +1,4 @@
+import csv
 import re
 from typing import List
 from tree_sitter import Language, Parser, Node
@@ -6,7 +7,7 @@ import tree_sitter_python as tspython
 import pandas as pd
 import json
 
-from .label_dictionary import LabelDictionary
+from label_dictionary import LabelDictionary
 
 
 class PatternExtractor:
@@ -240,6 +241,14 @@ class PatternExtractor:
         return bio
 
 
+    def regex_conversion(self, token):
+        if re.search(r'\\u[0-9A-Fa-f]{4}', str(token)[2:-1]):
+            return re.sub(r'\x00', r'\\u0000',
+                          re.sub(r'\n?([^\x00-\x7F]+)\n?', '', token.decode('ascii').strip()))
+        return re.sub(r'\x00', r'\\u0000',
+               re.sub(r'\n?([^\x00-\x7F]+)\n?', '', token.decode('raw_unicode_escape').strip()))
+
+
     def get_all_bio_labels(self, source_code, language, file_name):
         """
         For all non-leaf labels, generates BIO labels with parameters for tokens and sends to CSV file.
@@ -267,7 +276,15 @@ class PatternExtractor:
         leaf_nodes = self.get_nodes_at_level(root_node, -1)
 
         data = {
-            'TOKEN': [str(node.text)[2:-1] for node in leaf_nodes],
+            'TOKEN': [
+                # re.sub(r'\x00', r'\\u0000',
+                #        re.sub(r'\n?([^\x00-\x7F]+)\n?', '', node.text.decode('raw_unicode_escape').strip()))
+                # for node in leaf_nodes
+
+                self.regex_conversion(node.text) for node in leaf_nodes
+
+                # self.unicode_escape_preserve_case(node.text) for node in leaf_nodes
+            ],
             'REGEX': [self.find_label_with_regex(str(node.text)[2:-1]) for node in leaf_nodes]
         }
 
@@ -280,45 +297,26 @@ class PatternExtractor:
             print(df)
         print('\n')
 
-        df.to_csv(file_name + '.csv', index=False)
+        df.to_csv(file_name + '.csv', index=False, escapechar='\\')
 
+        with open(file_name + '.csv', mode='r') as file:
+            csv_file = csv.reader(file)
+            lines = []
+            for line in csv_file:
+                line[0] = line[0].replace('\\\\u', '\\u')
+                # line[0] = re.sub(r'\\(u)\b', r'\1', line[0])
+                # line[0] = re.sub(r'\\\\("|\'|)\b', r'\1', line[0])
+                sub_re = re.sub(r'\\\\([nrt"\'])', r'\\\1', line[0])
+                fl = sub_re != line[0]
+                line[0] = sub_re
+                if fl:
+                    line[0] = re.sub(r'\\\\\\(?=\S)', 'FILL_WITH_ONE_SLASH', line[0])
+                    line[0] = line[0].replace('FILL_WITH_ONE_SLASH', '\\\\')
+                else:
+                    line[0] = re.sub(r'\\\\\\(?=\S)', '\\\\', line[0])
+                lines.append(line)
 
-# def main():
-#     # could try splitting into an array by '\n', that could make it easier for leaves at least?
-#     source_code = b'''
-#     public class HelloWorld {
-#         public static void main(String[] args) {
-#             System.out.println("Hello, World!");
-#         }
-#     }
-#     '''
-#
-#     # source_code = b'''
-#     # for (int i = 0; i < 10; i++) {
-#     #     System.out.println(i);
-#     # }
-#     # # '''
-#
-#     # source_code = b'''
-#     # def add_numbers (a, b):
-#     #     return a + b
-#     # '''
-#
-#     # source_code = b'''
-#     # # Comment about function
-#     # '''
-#
-#     # source_code = b'''
-#     # public int addNumbers(a, b) {
-#     #     return a + b;
-#     # }
-#     # '''
-#     e = PatternExtractor()
-#     # e.extract_bio_labels_from_source_code(source_code, 'java')
-#
-#     e.get_all_bio_labels(source_code, 'java')
-#     # e.create_tree_json(source_code, 'java', 'test')
-#
-#
-# if __name__ == "__main__":
-#     main()
+        # Write updated lines back to the CSV file
+        with open(file_name + '.csv', mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(lines)
