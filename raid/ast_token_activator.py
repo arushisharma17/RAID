@@ -112,7 +112,7 @@ class ActivationAnnotator:
         # Annotate data
         self.annotate_data(tokens_with_depth, activations, output_dir)
         # Write aggregated activations
-        self.write_aggregated_activations(activations, output_dir)
+        self.write_aggregated_activations(tokens_with_depth, activations, output_dir)
         # Aggregate phrase activations
         phrase_activations = self.aggregate_phrase_activations(tokens_with_depth, activations, method=self.aggregation_method)
         # Output mapping to file
@@ -306,19 +306,35 @@ class ActivationAnnotator:
             json.dump(phrase_activations, f, indent=2)
         print(f"Phrase activations saved to '{mapping_file}'.")
 
-    def write_aggregated_activations(self, activations, output_dir):
-        """Writes the mean-aggregated activations across all layers to a file."""
-        # Construct output file path
-        aggregated_file = os.path.join(output_dir, f"{self.output_prefix}_aggregated_activations.txt")
+    def write_aggregated_activations(self, tokens_with_depth, activations, output_dir):
+        """Writes the mean-aggregated activations across all layers to a JSON file."""
+        aggregated_file = os.path.join(output_dir, f"{self.output_prefix}_aggregated_activations.json")
         
+        # Create a list to store token-activation mappings
+        token_activations = []
+        
+        # Iterate through tokens and their activations together
+        for (token, _), token_layers in zip(tokens_with_depth, activations):
+            # Get activations from all layers for this token
+            layer_activations = [layer[1] for layer in token_layers]
+            # Aggregate across layers using the specified method
+            aggregated = self.aggregate_activation_list(layer_activations, method=self.aggregation_method)
+            
+            # Create feature object for this token
+            token_feature = {
+                "token": token,  # Use actual token from tokens_with_depth
+                "aggregated_values": aggregated.tolist()
+            }
+            token_activations.append(token_feature)
+        
+        # Build the output data structure
+        output_data = {
+            "aggregation_method": self.aggregation_method,
+            "features": token_activations
+        }
+        
+        # Write to JSON file
         with open(aggregated_file, 'w', encoding='utf-8') as f:
-            for token_activations in activations:
-                # Get activations from all layers for this token
-                layer_activations = [layer[1] for layer in token_activations]
-                # Aggregate across layers using the specified method
-                aggregated = self.aggregate_activation_list(layer_activations, method=self.aggregation_method)
-                # Convert to string and write
-                activation_str = ' '.join(map(str, aggregated.tolist()))
-                f.write(activation_str + '\n')
+            json.dump(output_data, f, indent=2)
         
         print(f"Aggregated activations saved to '{aggregated_file}'.")
