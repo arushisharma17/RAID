@@ -2,8 +2,8 @@ import csv
 import re
 import time
 
-from extract_patterns import PatternExtractor
-from label_dictionary import LabelDictionary
+from .extract_patterns import PatternExtractor
+from .label_dictionary import LabelDictionary
 import os
 
 start_time = time.time()
