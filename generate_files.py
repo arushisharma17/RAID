@@ -64,7 +64,7 @@ class TokenLabelFilesGenerator:
                 if len(line.strip()) == 0:
                     file_in.write('\n')
                     file_labels.write('\n')
-                    file_labels.write('\n')
+                    file_bio.write('\n')
                     continue
                 elif line.lstrip()[:2] == '/*' and len(tokens[prev:token_index+1]) > 0:
                     file_in.write(' '.join(tokens[prev:token_index+1]).strip() + '\n')
@@ -108,7 +108,7 @@ class TokenLabelFilesGenerator:
                 if cut_to_next_line:
                     file_in.write('\n')
                     file_labels.write('\n')
-                    file_labels.write('\n')
+                    file_bio.write('\n')
                 if token_str.find('\n') > -1 and cut_to_next_line:
                     next(line_enum)
                 token_str = ''
