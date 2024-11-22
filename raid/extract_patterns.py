@@ -7,8 +7,7 @@ import tree_sitter_python as tspython
 import pandas as pd
 import json
 
-# from label_dictionary import LabelDictionary
-from .label_dictionary import LabelDictionary
+from label_dictionary import LabelDictionary
 
 
 class PatternExtractor:
@@ -294,9 +293,9 @@ class PatternExtractor:
             data[non_leaf_type.upper()] = bio
 
         df = pd.DataFrame(data)
-        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-            print(df)
-        print('\n')
+        # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        #     print(df)
+        # print('\n')
 
         df.to_csv(file_name + '.csv', index=False, escapechar='\\')
 
@@ -321,3 +320,44 @@ class PatternExtractor:
         with open(file_name + '.csv', mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(lines)
+
+
+# def main():
+#     # could try splitting into an array by '\n', that could make it easier for leaves at least?
+#     # source_code = b'''
+#     # public class HelloWorld {
+#     #     public static void main(String[] args) {
+#     #         System.out.println("Hello, World!");
+#     #     }
+#     # }
+#     # '''
+#
+#     # source_code = b'''
+#     # for (int i = 0; i < 10; i++) {
+#     #     System.out.println(i);
+#     # }
+#     # # '''
+#
+#     # source_code = b'''
+#     # def add_numbers (a, b):
+#     #     return a + b
+#     # '''
+#
+#     # source_code = b'''
+#     # # Comment about function
+#     # '''
+#
+#     source_code = b'''
+#     public int addNumbers(a, b) {
+#         return a + b;
+#     }
+#     '''
+#     e = PatternExtractor()
+#     # e.extract_bio_labels_from_source_code(source_code, 'java')
+#
+#     e.get_all_bio_labels(source_code, 'java', 'test')
+#     # e.create_tree_json(source_code, 'java', 'test')
+#
+#
+# if __name__ == "__main__":
+#     main()
