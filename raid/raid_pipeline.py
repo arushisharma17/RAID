@@ -19,6 +19,7 @@ Command Line Arguments:
     --output_prefix: Prefix for output files (default: 'output')
     --aggregation_method: Method for aggregating activations (default: 'mean')
     --label: Non-leaf type for token categorization (default: 'leaves')
+    --layer: Specific transformer layer to extract (default: all layers)
 """
 
 import os
@@ -70,6 +71,10 @@ def main() -> NoReturn:
     parser_arg.add_argument('--label',
                            default='leaves',
                            help='Desired non-leaf type to categorize tokens.')
+    parser_arg.add_argument('--layer',
+                           type=int,
+                           default=None,
+                           help='Specific transformer layer to extract (default: all layers)')
     args = parser_arg.parse_args()
 
     java_file_path = args.file
@@ -94,7 +99,8 @@ def main() -> NoReturn:
         model_name=args.model,
         device=args.device,
         binary_filter=args.binary_filter,
-        output_prefix=args.output_prefix
+        output_prefix=args.output_prefix,
+        layer=args.layer
     )
     activation_annotator.process_activations(ast_processor.tokens_tuples, output_dir)
 

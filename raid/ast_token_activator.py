@@ -147,12 +147,15 @@ class ActivationAnnotator:
         output_prefix (str): Prefix for output files
         binary_filter_compiled (Union[Pattern, set]): Compiled filter
         aggregation_method (str): Method for aggregating activations
+        layer (int, optional): Specific transformer layer to extract.
+                             If None, extracts all layers.
     """
 
     def __init__(self, model_name: str, device: str = 'cpu', 
                  binary_filter: str = 'set:public,static', 
                  output_prefix: str = 'output',
-                 aggregation_method: str = 'mean'):
+                 aggregation_method: str = 'mean',
+                 layer: int = None):
         """
         Initialize the ActivationAnnotator.
         
@@ -162,13 +165,16 @@ class ActivationAnnotator:
             binary_filter: Filter specification (starts with 're:' for regex or 'set:' for word set)
             output_prefix: Prefix for output files
             aggregation_method: Method for aggregating activations ('mean', 'max', 'sum', 'concat')
+            layer (int, optional): Specific transformer layer to extract.
+                                 If None, extracts all layers.
         """
         self.model_name = model_name
         self.device = device
         self.binary_filter = binary_filter
         self.output_prefix = output_prefix
-        self.binary_filter_compiled = None
+        self.binary_filter_compiled = re.compile(binary_filter)
         self.aggregation_method = aggregation_method
+        self.layer = layer
 
     def process_activations(self, tokens_tuples: List[Tuple[str, str, int]], 
                           output_dir: str) -> None:
@@ -207,13 +213,24 @@ class ActivationAnnotator:
             FileNotFoundError: If input file doesn't exist
             RuntimeError: If model fails to generate activations
         """
+        extract_args = {
+            "aggregation": "average",
+            "output_type": "json",
+            "device": self.device
+        }
+        
+        # Add layer-specific arguments if a layer is specified
+        if self.layer is not None:
+            extract_args.update({
+                "decompose_layers": True,
+                "filter_layers": str(self.layer)
+            })
+            
         transformers_extractor.extract_representations(
             self.model_name,
             input_file,
             output_file,
-            aggregation="average",  
-            output_type="json",
-            device=self.device
+            **extract_args
         )
 
     def parse_activations(self, activation_file: str) -> Tuple[List[str], List[List[Tuple[int, np.ndarray]]]]:
