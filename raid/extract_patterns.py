@@ -7,8 +7,7 @@ import tree_sitter_python as tspython
 import pandas as pd
 import json
 
-from label_dictionary import LabelDictionary
-
+from .label_dictionary import LabelDictionary
 
 class PatternExtractor:
 

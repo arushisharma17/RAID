@@ -1,9 +1,30 @@
+"""
+RAID Pipeline Main Script
+
+This module serves as the main entry point for the RAID (Recognition and Analysis of Identifiers) pipeline,
+which processes Java source code for neural network analysis. It coordinates the use of various components
+including AST processing, activation generation, and token labeling.
+
+The pipeline performs the following steps:
+1. Processes Java source code to extract AST information
+2. Generates neural network activations for code tokens
+3. Creates labeled datasets for further analysis
+4. Generates input and label files in BIO format
+
+Command Line Arguments:
+    file: Path to the Java source file
+    --model: Transformer model name (default: 'bert-base-uncased')
+    --device: Computing device ('cpu' or 'cuda', default: 'cpu')
+    --binary_filter: Filter for token labeling (default: 'set:public,static')
+    --output_prefix: Prefix for output files (default: 'output')
+    --aggregation_method: Method for aggregating activations (default: 'mean')
+    --label: Non-leaf type for token categorization (default: 'leaves')
+"""
+
 import os
 import sys
 import argparse
-
-# Add the 'src' directory to sys.path to allow module imports
-# sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+from typing import NoReturn
 
 # Import necessary classes from other modules
 from .ast_token_activator import JavaASTProcessor, ActivationAnnotator
@@ -11,20 +32,49 @@ from .extract_patterns import PatternExtractor
 from .generate_files import TokenLabelFilesGenerator
 
 
-def main():
+def main() -> NoReturn:
+    """
+    Main entry point for the RAID pipeline.
+    
+    This function:
+    1. Parses command line arguments
+    2. Sets up the processing environment
+    3. Initializes and runs the AST processor
+    4. Generates and processes neural network activations
+    5. Creates labeled token files
+    
+    Raises:
+        FileNotFoundError: If the specified Java file doesn't exist
+        IOError: If unable to create output directory
+        Exception: For various processing errors in the pipeline stages
+    """
     # Set up argument parser
     parser_arg = argparse.ArgumentParser(description='RAID pipeline for processing Java code.')
-    parser_arg.add_argument('file', help='Path to the Java source file.')
-    parser_arg.add_argument('--model', default='bert-base-uncased', help='Transformer model for activations.')
-    parser_arg.add_argument('--device', default='cpu', help='Device to run the model on ("cpu" or "cuda").')
-    parser_arg.add_argument('--binary_filter', default='set:public,static', help='Binary filter for labeling.')
-    parser_arg.add_argument('--output_prefix', default='output', help='Prefix for output files.')
-    parser_arg.add_argument('--aggregation_method', default='mean', help='Aggregation method for activations (mean, max, sum, concat).')
-    parser_arg.add_argument('--label', default='leaves', help='Desired non-leaf type to categorize tokens.')
+    parser_arg.add_argument('file', 
+                           help='Path to the Java source file.')
+    parser_arg.add_argument('--model', 
+                           default='bert-base-uncased',
+                           help='Transformer model for activations.')
+    parser_arg.add_argument('--device', 
+                           default='cpu',
+                           help='Device to run the model on ("cpu" or "cuda").')
+    parser_arg.add_argument('--binary_filter',
+                           default='set:public,static',
+                           help='Binary filter for labeling.')
+    parser_arg.add_argument('--output_prefix',
+                           default='output',
+                           help='Prefix for output files.')
+    parser_arg.add_argument('--aggregation_method',
+                           default='mean',
+                           help='Aggregation method for activations (mean, max, sum, concat).')
+    parser_arg.add_argument('--label',
+                           default='leaves',
+                           help='Desired non-leaf type to categorize tokens.')
     args = parser_arg.parse_args()
 
     java_file_path = args.file
 
+    # Validate input file existence
     if not os.path.isfile(java_file_path):
         print(f"Error: File '{java_file_path}' does not exist.")
         sys.exit(1)
@@ -39,10 +89,6 @@ def main():
     ast_processor = JavaASTProcessor(java_file_path, output_dir)
     ast_processor.process_ast()
 
-    # Comment out AST visualization
-    # input_filename = os.path.splitext(os.path.basename(java_file_path))[0]
-    # ast_processor.visualize_ast(input_filename)
-
     # Process activations and annotate data
     activation_annotator = ActivationAnnotator(
         model_name=args.model,
@@ -54,7 +100,6 @@ def main():
 
     # Generate .in and .label files using TokenLabelFilesGenerator
     generator = TokenLabelFilesGenerator()
-    # Generate files based on the Java file
     generator.generate_in_label_bio_files(java_file_path, 'java', args.label)
 
 
