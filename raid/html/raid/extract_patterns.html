@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>raid.extract_patterns API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>raid.extract_patterns</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="raid.extract_patterns.PatternExtractor"><code class="flex name class">
+<span>class <span class="ident">PatternExtractor</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PatternExtractor:
+
+    def __init__(self):
+
+        self.cases = {
+            &#39;single_letter&#39;: &#39;^[a-zA-Z]$&#39;,
+            &#39;camel_case&#39;: &#39;^[a-z][a-z]*(?:[A-Z][a-z0-9]+)*[a-zA-Z]?$&#39;,
+            &#39;pascal_case&#39;: &#39;^([A-Z][a-z]+)*[A-Z][a-z]*$&#39;,
+            &#39;snake_case&#39;: &#39;^[a-z]+(_[a-z]+)*$&#39;,
+            &#39;screaming_snake_case&#39;: &#39;^[A-Z]+(_[A-Z]+)*$&#39;,
+            &#39;prefix&#39;: &#39;^(get|set)[A-Za-z]+$&#39;,
+            &#39;numeric&#39;: &#39;^[a-zA-Z].+[0-9]+$&#39;,
+        }
+
+
+
+
+    def check_token(self, token, regex):
+        pattern = self.cases[regex]
+        return bool(re.match(pattern, token))
+
+
+    def find_label_with_regex(self, token):
+        for key in self.cases:
+            if self.check_token(token, key):
+                return key
+        return &#39;O&#39;
+
+
+    def search_for_ancestor_type(self, leaf_node, type_to_search):
+        cursor = leaf_node
+        while cursor.parent:
+            if cursor.type == type_to_search:
+                return cursor.type
+            else:
+                cursor = cursor.parent
+        if cursor.type == type_to_search:
+            return cursor.type
+        return leaf_node.type# if leaf_node.type != str(leaf_node.text)[2:-1] else leaf_node.parent.type
+
+
+
+
+    def get_nodes_at_level(self, node, target_level) -&gt; List[Node]:
+        &#34;&#34;&#34;
+        Extracts nodes at a given number of levels down.
+
+        Parameters
+        ----------
+        node : tree_sitter.Node
+            The root node of the AST.
+        target_level : int
+            The desired depth to retrieve.
+
+        Returns
+        -------
+        List[Node]
+            A list of nodes at the target level down.
+        &#34;&#34;&#34;
+
+        def retrieve_nodes(node, target_level, current_level=0):
+            nodes_at_level = []
+
+            # if level is beyond tree, appends the leaf
+            if current_level == target_level or node.child_count == 0:
+                nodes_at_level.append(node)
+            else:
+                for child in node.children:
+                    nodes_at_level.extend(retrieve_nodes(child, target_level, current_level + 1))
+
+            return nodes_at_level
+
+        # print(&#39;target level:&#39;, target_level)
+        return retrieve_nodes(node, target_level)
+
+
+    def find_bio_label_type(self, node) -&gt; str:
+        return node.grammar_name
+
+
+    def extract_bio_labels_from_layer(self, source_code, language, depth=-1):
+        &#34;&#34;&#34;
+        Parses the source code, then generates and displays the separate tokens and labels for a specific layer.
+        Ignores specific labels.
+
+        Parameters
+        ----------
+        source_code : bytes
+            The code snippet to be parsed.
+        language : str
+            The language in which the code snippet should be parsed.
+        depth : int, optional
+            The desired depth to retrieve from the tree; the default value retrieves leaf nodes.
+        &#34;&#34;&#34;
+        if language == &#39;java&#39;:
+            code_language = Language(tsjava.language())
+        elif language == &#39;python&#39;:
+            code_language = Language(tspython.language())
+        else:
+            print(&#34;Please pick Java or Python as a language.&#34;)
+            return
+        parser = Parser(code_language)
+
+        tree = parser.parse(source_code)
+        root_node = tree.root_node
+
+        leaf_nodes = self.get_nodes_at_level(root_node, depth)
+        leaf_labels = []
+        bio = []
+        prev = None
+        b_clause = False
+        for i, node in enumerate(leaf_nodes):
+            name = self.find_bio_label_type(node)
+            leaf_text = str(node.text)[2:-1]
+            leaf_labels.append(self.find_label_with_regex(leaf_text) if node.type == &#39;identifier&#39; else &#39;O&#39;)
+
+            if node.child_count == 0 or (node.type == leaf_text and i &gt; 0 and (prev != name)
+                    and len(leaf_text) == 1 and not leaf_labels[-1] == &#39;single_letter&#39;):
+                bio.append(leaf_text + &#34;: O-&#34; + name)
+                b_clause = False
+            elif i &gt; 0 and b_clause and not (node == node.parent.child(0)):
+                bio.append(leaf_text + &#34;: I-&#34; + name)
+            else:
+                bio_type = &#39;B&#39;
+                bio.append(leaf_text + &#34;: &#34; + bio_type + &#39;-&#39; + name)
+                prev = name
+                b_clause = True
+
+        token_data = []
+        label_data = []
+        for element in bio:
+            split_element = element.split(&#34;: &#34;)
+            token_data.append(split_element[0])
+            label_data.append(split_element[1])
+
+        data = {&#34;TOKEN&#34;: token_data,
+                &#34;LABEL&#34;: label_data,
+                &#34;REGEX&#34;: leaf_labels}
+
+        df = pd.DataFrame(data)
+        with pd.option_context(&#39;display.max_rows&#39;, None, &#39;display.max_columns&#39;, None):
+            print(df)
+        print(&#39;\n&#39;)
+
+        return token_data, label_data, leaf_labels
+
+
+    def create_tree_json(self, source_code, language, name):
+        &#34;&#34;&#34;
+        Generates JSON in tree format of tokens and labels for source code.
+
+        Parameters
+        ----------
+        source_code : bytes
+            The code snippet to be parsed.
+        language : str
+            The language in which the code snippet should be parsed.
+        name : str
+            The desired name of the json file.
+        &#34;&#34;&#34;
+        if language == &#39;java&#39;:
+            code_language = Language(tsjava.language())
+        elif language == &#39;python&#39;:
+            code_language = Language(tspython.language())
+        else:
+            print(&#34;Please pick Java or Python as a language.&#34;)
+            return
+        parser = Parser(code_language)
+        tree = parser.parse(source_code)
+        root_node = tree.root_node
+        label_dictionary = LabelDictionary()
+
+        def tree_to_dict(node):
+            # Convert the current node&#39;s attributes into a dictionary
+            node_dict = {
+                &#39;token&#39;: str(node.text)[2:-1],
+                &#39;label&#39;: label_dictionary.convert_label(self.find_bio_label_type(node)),
+                &#39;sub_tokens&#39;: []
+            }
+
+            # Recursively convert each child and append to the &#39;children&#39; list
+            for child in node.children:
+                node_dict[&#39;sub_tokens&#39;].append(tree_to_dict(child))
+
+            return node_dict
+
+
+        tree_dict = tree_to_dict(root_node)
+        with open(name + &#39;.json&#39;, &#39;w&#39;) as json_file:
+            json.dump(tree_dict, json_file, indent=4)
+
+
+    def search_for_type(self, node_type, leaf_nodes, label_dictionary):
+        &#34;&#34;&#34;
+        For the given node type, returns list of labels for all leaves.
+
+        Parameters
+        ----------
+        node_type : str
+            The node type (non-leaf) to be parsed.
+        leaf_nodes : List[Node]
+            The list of leaf nodes.
+        label_dictionary : LabelDictionary
+            Label dictionary to be used for converting labels to desired format.
+
+        Returns
+        -------
+        List[str]
+            A list of labels with BIO label and parameter for each leaf.
+        &#34;&#34;&#34;
+        bio = []
+        prev = None
+        for node in leaf_nodes:
+            label_type = self.search_for_ancestor_type(node, node_type)
+            if label_type == node_type:
+                bio_label = &#39;I&#39; if prev == label_type else &#39;B&#39;
+            else:
+                bio_label = &#39;O&#39;
+            bio.append(bio_label + &#39;-&#39; + label_dictionary.convert_label(label_type))
+
+            if prev == node_type and prev != label_type:
+                bio[-2] = &#39;O&#39; + bio[-2][1:]  # last label is always O
+
+            prev = label_type
+
+        if prev == node_type:
+            bio[-1] = &#39;O&#39; + bio[-1][1:]  # last label is always O
+
+        return bio
+
+
+    def regex_conversion(self, token):
+        if re.search(r&#39;\\u[0-9A-Fa-f]{4}&#39;, str(token)[2:-1]):
+            return re.sub(r&#39;\x00&#39;, r&#39;\\u0000&#39;,
+                          re.sub(r&#39;\n?([^\x00-\x7F]+)\n?&#39;, &#39;&#39;, token.decode(&#39;ascii&#39;).strip()))
+        return re.sub(r&#39;\x00&#39;, r&#39;\\u0000&#39;,
+               re.sub(r&#39;\n?([^\x00-\x7F]+)\n?&#39;, &#39;&#39;, token.decode(&#39;raw_unicode_escape&#39;).strip()))
+
+
+    def get_all_bio_labels(self, source_code, language, file_name):
+        &#34;&#34;&#34;
+        For all non-leaf labels, generates BIO labels with parameters for tokens and sends to CSV file.
+
+        Parameters
+        ----------
+        source_code : bytes
+            The source code to be parsed.
+        language : str
+            Language for the source code to be parsed in.
+        file_name : str
+            File name for generated CSV.
+        &#34;&#34;&#34;
+        if language == &#39;java&#39;:
+            code_language = Language(tsjava.language())
+        elif language == &#39;python&#39;:
+            code_language = Language(tspython.language())
+        else:
+            print(&#34;Please pick Java or Python as a language.&#34;)
+            return
+        parser = Parser(code_language)
+        label_dictionary = LabelDictionary()
+        tree = parser.parse(source_code)
+        root_node = tree.root_node
+        leaf_nodes = self.get_nodes_at_level(root_node, -1)
+
+        data = {
+            &#39;TOKEN&#39;: [
+                # re.sub(r&#39;\x00&#39;, r&#39;\\u0000&#39;,
+                #        re.sub(r&#39;\n?([^\x00-\x7F]+)\n?&#39;, &#39;&#39;, node.text.decode(&#39;raw_unicode_escape&#39;).strip()))
+                # for node in leaf_nodes
+
+                self.regex_conversion(node.text) for node in leaf_nodes
+
+                # self.unicode_escape_preserve_case(node.text) for node in leaf_nodes
+            ],
+            &#39;REGEX&#39;: [self.find_label_with_regex(str(node.text)[2:-1]) for node in leaf_nodes]
+        }
+
+        for non_leaf_type in label_dictionary.non_leaf_types:
+            bio = self.search_for_type(non_leaf_type, leaf_nodes, label_dictionary)
+            data[non_leaf_type.upper()] = bio
+
+        df = pd.DataFrame(data)
+        # with pd.option_context(&#39;display.max_rows&#39;, None, &#39;display.max_columns&#39;, None):
+        #     print(df)
+        # print(&#39;\n&#39;)
+
+        df.to_csv(file_name + &#39;.csv&#39;, index=False, escapechar=&#39;\\&#39;)
+
+        with open(file_name + &#39;.csv&#39;, mode=&#39;r&#39;) as file:
+            csv_file = csv.reader(file)
+            lines = []
+            for line in csv_file:
+                line[0] = line[0].replace(&#39;\\\\u&#39;, &#39;\\u&#39;)
+                # line[0] = re.sub(r&#39;\\(u)\b&#39;, r&#39;\1&#39;, line[0])
+                # line[0] = re.sub(r&#39;\\\\(&#34;|\&#39;|)\b&#39;, r&#39;\1&#39;, line[0])
+                sub_re = re.sub(r&#39;\\\\([nrt&#34;\&#39;])&#39;, r&#39;\\\1&#39;, line[0])
+                fl = sub_re != line[0]
+                line[0] = sub_re
+                if fl:
+                    line[0] = re.sub(r&#39;\\\\\\(?=\S)&#39;, &#39;FILL_WITH_ONE_SLASH&#39;, line[0])
+                    line[0] = line[0].replace(&#39;FILL_WITH_ONE_SLASH&#39;, &#39;\\\\&#39;)
+                else:
+                    line[0] = re.sub(r&#39;\\\\\\(?=\S)&#39;, &#39;\\\\&#39;, line[0])
+                lines.append(line)
+
+        # Write updated lines back to the CSV file
+        with open(file_name + &#39;.csv&#39;, mode=&#39;w&#39;, newline=&#39;&#39;) as file:
+            writer = csv.writer(file)
+            writer.writerows(lines)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="raid.extract_patterns.PatternExtractor.check_token"><code class="name flex">
+<span>def <span class="ident">check_token</span></span>(<span>self, token, regex)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.create_tree_json"><code class="name flex">
+<span>def <span class="ident">create_tree_json</span></span>(<span>self, source_code, language, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates JSON in tree format of tokens and labels for source code.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>source_code</code></strong> :&ensp;<code>bytes</code></dt>
+<dd>The code snippet to be parsed.</dd>
+<dt><strong><code>language</code></strong> :&ensp;<code>str</code></dt>
+<dd>The language in which the code snippet should be parsed.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The desired name of the json file.</dd>
+</dl></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.extract_bio_labels_from_layer"><code class="name flex">
+<span>def <span class="ident">extract_bio_labels_from_layer</span></span>(<span>self, source_code, language, depth=-1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parses the source code, then generates and displays the separate tokens and labels for a specific layer.
+Ignores specific labels.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>source_code</code></strong> :&ensp;<code>bytes</code></dt>
+<dd>The code snippet to be parsed.</dd>
+<dt><strong><code>language</code></strong> :&ensp;<code>str</code></dt>
+<dd>The language in which the code snippet should be parsed.</dd>
+<dt><strong><code>depth</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The desired depth to retrieve from the tree; the default value retrieves leaf nodes.</dd>
+</dl></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.find_bio_label_type"><code class="name flex">
+<span>def <span class="ident">find_bio_label_type</span></span>(<span>self, node) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.find_label_with_regex"><code class="name flex">
+<span>def <span class="ident">find_label_with_regex</span></span>(<span>self, token)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.get_all_bio_labels"><code class="name flex">
+<span>def <span class="ident">get_all_bio_labels</span></span>(<span>self, source_code, language, file_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>For all non-leaf labels, generates BIO labels with parameters for tokens and sends to CSV file.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>source_code</code></strong> :&ensp;<code>bytes</code></dt>
+<dd>The source code to be parsed.</dd>
+<dt><strong><code>language</code></strong> :&ensp;<code>str</code></dt>
+<dd>Language for the source code to be parsed in.</dd>
+<dt><strong><code>file_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>File name for generated CSV.</dd>
+</dl></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.get_nodes_at_level"><code class="name flex">
+<span>def <span class="ident">get_nodes_at_level</span></span>(<span>self, node, target_level) ‑> List[tree_sitter.Node]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extracts nodes at a given number of levels down.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>node</code></strong> :&ensp;<code>tree_sitter.Node</code></dt>
+<dd>The root node of the AST.</dd>
+<dt><strong><code>target_level</code></strong> :&ensp;<code>int</code></dt>
+<dd>The desired depth to retrieve.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Node]</code></dt>
+<dd>A list of nodes at the target level down.</dd>
+</dl></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.regex_conversion"><code class="name flex">
+<span>def <span class="ident">regex_conversion</span></span>(<span>self, token)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.search_for_ancestor_type"><code class="name flex">
+<span>def <span class="ident">search_for_ancestor_type</span></span>(<span>self, leaf_node, type_to_search)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="raid.extract_patterns.PatternExtractor.search_for_type"><code class="name flex">
+<span>def <span class="ident">search_for_type</span></span>(<span>self, node_type, leaf_nodes, label_dictionary)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>For the given node type, returns list of labels for all leaves.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>node_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The node type (non-leaf) to be parsed.</dd>
+<dt><strong><code>leaf_nodes</code></strong> :&ensp;<code>List[Node]</code></dt>
+<dd>The list of leaf nodes.</dd>
+<dt><strong><code>label_dictionary</code></strong> :&ensp;<code>LabelDictionary</code></dt>
+<dd>Label dictionary to be used for converting labels to desired format.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[str]</code></dt>
+<dd>A list of labels with BIO label and parameter for each leaf.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="raid.extract_patterns.PatternExtractor" href="#raid.extract_patterns.PatternExtractor">PatternExtractor</a></code></h4>
+<ul class="">
+<li><code><a title="raid.extract_patterns.PatternExtractor.check_token" href="#raid.extract_patterns.PatternExtractor.check_token">check_token</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.create_tree_json" href="#raid.extract_patterns.PatternExtractor.create_tree_json">create_tree_json</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.extract_bio_labels_from_layer" href="#raid.extract_patterns.PatternExtractor.extract_bio_labels_from_layer">extract_bio_labels_from_layer</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.find_bio_label_type" href="#raid.extract_patterns.PatternExtractor.find_bio_label_type">find_bio_label_type</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.find_label_with_regex" href="#raid.extract_patterns.PatternExtractor.find_label_with_regex">find_label_with_regex</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.get_all_bio_labels" href="#raid.extract_patterns.PatternExtractor.get_all_bio_labels">get_all_bio_labels</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.get_nodes_at_level" href="#raid.extract_patterns.PatternExtractor.get_nodes_at_level">get_nodes_at_level</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.regex_conversion" href="#raid.extract_patterns.PatternExtractor.regex_conversion">regex_conversion</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.search_for_ancestor_type" href="#raid.extract_patterns.PatternExtractor.search_for_ancestor_type">search_for_ancestor_type</a></code></li>
+<li><code><a title="raid.extract_patterns.PatternExtractor.search_for_type" href="#raid.extract_patterns.PatternExtractor.search_for_type">search_for_type</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>
