@@ -1,3 +1,5 @@
+--extra-index-url https://git.ece.iastate.edu/api/v4/projects/6616/packages/pypi/simple
+
 asttokens==2.4.1
 attrs==24.2.0
 backcall==0.2.0
@@ -24,8 +26,8 @@ graphviz==0.20.3
 h5py==3.12.1
 huggingface-hub==0.25.1
 idna==3.10
-imbalanced-learn==0.12.4
 ipython==8.12.3
+imbalanced-learn==0.8.0
 itsdangerous==2.2.0
 jedi==0.19.1
 Jinja2==3.1.4
@@ -46,6 +48,7 @@ nbclient==0.10.0
 nbconvert==7.16.4
 nbformat==5.10.4
 networkx==3.3
+NeuroXCode
 numpy==1.26.4
 packaging==24.1
 pandas==2.2.3
@@ -96,4 +99,3 @@ wcwidth==0.2.13
 webencodings==0.5.1
 Werkzeug==3.0.4
 yarg==0.1.9
-NeuroXCode

@@ -29,7 +29,7 @@ Run RAID on a Java file:
 ```bash
 raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
 ```
-   
+   $ raid C:/Users/hkhri/OneDrive/Desktop/SD/RAID/input/sample_input.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
 
 ## How to Run
 In terminal, run the following command:

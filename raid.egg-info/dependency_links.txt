@@ -1,1 +1,0 @@
-git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7#egg=neurox
