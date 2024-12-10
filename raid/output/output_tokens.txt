@@ -1,6 +1,6 @@
 
 
-class HelloWorld
+class HelloWorlds
 public { }
 void main
 public static ( ) { }
