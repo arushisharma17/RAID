@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
-Name: raid
-Version: 1.0.0
+Name: raid-tool
+Version: 2.0.1
 Summary: RAID: Rapid Automated Interpretability Datasets tool
 Home-page: https://github.com/arushisharma17/RAID
-Author: Hrishikesha Kyathsandra
+Author: Arushi Sharma, Hrishikesha Kyathsandra, Zeynep Oghan
 Author-email: hk.hrishi30@gmail.com
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
@@ -123,6 +123,23 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
    c. CFG, DFG, AST Nesting/Parent-child relationships, etc -Hierarchical
    d. SE datasets, Ontologies, Design Patterns - Semantic
    e. Regular Expressions to create datasets, filter datasets, edit datasets.
+
+## Temp Installation Instructions
+
+Install RAID from TestPyPI, and its NeuroX dependency:
+
+```bash
+pip install -i https://test.pypi.org/simple/ raid==1.0.0
+pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7
+```
+
+### Usage
+
+Run RAID on a Java file:
+
+```bash
+raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
+```
    
 
 ## How to Run
