@@ -51,75 +51,68 @@ class TokenLabelFilesGenerator:
         prev = 0
         token_index = 0
         token_str = ''
-        tokens_len = len(tokens)  # Get total length of tokens
-        
-        with (open(file_name + '.in', 'a') as file_in, 
-              open(file_name + '.label', 'a') as file_labels,
+        token_iter = iter(tokens)
+        cut_to_next_line = True
+        with (open(file_name + '.in', 'a') as file_in, open(file_name + '.label', 'a') as file_labels,
               open(file_name + '.bio', 'w') as file_bio):
-            
             lines = string.split('\n')
-            for i, line in enumerate(lines):
+            line_enum = iter(lines)
+            for i, line in enumerate(line_enum):
+                print(i)
                 if len(line.strip()) == 0:  # if line is blank, add newline and skip
                     file_in.write('\n')
                     file_labels.write('\n')
-                    file_bio.write('\n')
+                    file_labels.write('\n')
                     continue
-                    
-                # Handle multiline comments
-                if line.lstrip()[:2] == '/*' and prev < token_index + 1 and token_index < tokens_len:
+                elif line.lstrip()[:2] == '/*' and len(tokens[prev:token_index+1]) > 0:  # special handling for multiline comments
                     file_in.write(' '.join(tokens[prev:token_index+1]).strip() + '\n')
                     file_labels.write(' '.join(label[2:] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
                     file_bio.write(' '.join(label[0] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
                     token_str = ''
+                    for it in range(''.join(tokens[prev:token_index+1]).count('\n')):
+                        next(line_enum)
                     prev = token_index + 1
                     token_index += 1
+                    next(token_iter)
                     continue
-
                 line = line.replace(" ", "")  # don't worry about spaces
-                cut_to_next_line = True
-                
-                # Process tokens for this line
-                while token_index < tokens_len and abs(prev - token_index) < 500:  # Add bounds check
-                    current_token = tokens[token_index]
-                    stripped_token = current_token.replace(" ", "")
-                    
-                    # Handle escaped characters
-                    if stripped_token.startswith('\\\\') and len(stripped_token) > 2:
-                        stripped_token = stripped_token.replace('\\\\', '\\')
-                        
-                    token_str += stripped_token
+                while abs(prev - token_index < 500):  # hard-coded stop if going on for too long
+                    t = next(token_iter)
+                    token_index += 1
+                    stripped_t = t.replace(" ", "")
+
+                    # sometimes extra forward slashes are added, deal with those
+                    if stripped_t.startswith('\\\\') and len(stripped_t) > 2:
+                        stripped_t = stripped_t.replace('\\\\', '\\')
+                    token_str += stripped_t
                     test_token_str = token_str.replace('\\', '').strip()
                     test_line = line.replace('\\', '').strip().replace('\t', '')
-                    
-                    t_count = current_token.count('\n')
+                    t_count = t.count('\n')
                     if t_count > 0:  # if token is multiline
-                        cut_to_next_line = line in current_token or line == token_str[:token_str.find('\n')]
+                        for it in range(t_count-1):
+                            next(line_enum)
+                        cut_to_next_line = line in t or line == token_str[:token_str.find('\n')]
                         break
-                    elif test_line.endswith(test_token_str):  # if the line and token_str are a match
+                    elif test_line.endswith(test_token_str):  # if the line and token_str are a match (ending with)
                         if not test_line.startswith(test_token_str) or test_line == test_token_str:
                             cut_to_next_line = True
                             break
-                    elif len(test_token_str) > len(test_line):  # if token_str has become longer than the line
+                    elif len(test_token_str) > len(test_line):  # if token_str has become longer than the line, break
                         cut_to_next_line = True
                         break
-                        
-                    token_index += 1
-                    if token_index >= tokens_len:
-                        break
-                
-                # Write accumulated tokens
-                if prev < token_index and prev < tokens_len:
-                    file_in.write(' '.join(tokens[prev:token_index]) + ' ')
-                    file_labels.write(' '.join(label[2:] for label in labels[prev:token_index]) + ' ')
-                    file_bio.write(' '.join(label[0] for label in labels[prev:token_index]) + ' ')
-                
-                if cut_to_next_line:  # Add newlines if needed
+                file_in.write(' '.join(tokens[prev:token_index]) + ' ')
+                file_labels.write(' '.join(label[2:] for label in labels[prev:token_index]) + ' ')
+                file_bio.write(' '.join(label[0] for label in labels[prev:token_index]) + ' ')
+                print(f'{token_str}\nVS\n{line}')
+                print('line break', cut_to_next_line)
+                if cut_to_next_line:  # if it's time to add a newline (sometimes tokens will start on the same line)
                     file_in.write('\n')
                     file_labels.write('\n')
-                    file_bio.write('\n')
-                
-                token_str = ''  # Reset for next line
-                prev = token_index  # Update token start position
+                    file_labels.write('\n')
+                    if token_str.find('\n') >= 0:
+                        next(line_enum)
+                token_str = ''  # reset token_str after a line is processed
+                prev = token_index  # set current index for tokens
 
 
     def generate_in_label_bio_files(self, source_file, language, label_type):

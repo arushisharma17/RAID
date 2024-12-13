@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="raid-tool",
-    version="2.0.1",
+    version="3.1.1",
     author="Arushi Sharma, Hrishikesha Kyathsandra, Zeynep Oghan",
     author_email="hk.hrishi30@gmail.com",
     description="RAID: Rapid Automated Interpretability Datasets tool",
