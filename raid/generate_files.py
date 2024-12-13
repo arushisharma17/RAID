@@ -125,52 +125,69 @@ class TokenLabelFilesGenerator:
     def generate_in_label_bio_files(self, source_file, language, label_type):
         """
         Generates .in, .label, and .bio files for the given text file.
-
-        Parameters
-        ----------
-        source_file : str
-            The text file containing elements to be written to the .in and .label files.
-        language : str
-            The language to extra labels in.
-        label_type : str
-            The desired label (non-leaf) to be parsed.
         """
         label_dictionary = LabelDictionary()
-        file_name = 'output/' + os.path.basename(source_file).split('.')[0]
+        
+        # Use os.path.join for proper path handling
+        output_dir = os.path.join(os.getcwd(), 'output')
+        base_name = os.path.basename(source_file).split('.')[0]
+        file_name = os.path.join(output_dir, base_name)
+        
         tokens = []
         bio_labels = []
-        with (open(file_name + '.in', 'w') as file_in, open(file_name + '.label', 'w') as file_label,
+
+        # Create output directory if it doesn't exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Initialize files
+        with (open(file_name + '.in', 'w') as file_in, 
+              open(file_name + '.label', 'w') as file_label,
               open(file_name + '.bio', 'w') as file_bio):
             file_in.write('')
             file_label.write('')
             file_bio.write('')
 
-
         strings = self.read_file(source_file)
+        csv_file_path = file_name + '.csv'
 
-        if not os.path.isfile(file_name + '.csv'):
-            print("No CSV Found")
+        if not os.path.isfile(csv_file_path):
+            print(f"Generating CSV file at {csv_file_path}")
             extractor = PatternExtractor()
-            # strings = self.read_file(source_file)
             for st in strings:
                 extractor.get_all_bio_labels(bytes(st, encoding='utf8'), language, file_name)
+        
         print("CSV Finished")
         elapsed_time = time.time() - start_time
         print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
-        with open(file_name + '.csv', mode='r') as file:
-            csv_file = csv.reader(file)
-            iter_csv = iter(csv_file)
-            next(iter_csv)
-            for i, lines in enumerate(iter_csv):
-                tokens.append(lines[0])
-                bio_labels.append(lines[label_dictionary.non_leaf_types[label_type]])
+        try:
+            with open(csv_file_path, mode='r') as file:
+                csv_file = csv.reader(file)
+                iter_csv = iter(csv_file)
+                next(iter_csv)  # Skip header
+                for i, lines in enumerate(iter_csv):
+                    if len(lines) > 0:  # Make sure we have data
+                        tokens.append(lines[0])
+                        label_index = label_dictionary.non_leaf_types.get(label_type)
+                        if label_index is None:
+                            raise ValueError(f"Invalid label type: {label_type}")
+                        if label_index < len(lines):
+                            bio_labels.append(lines[label_index])
+                        else:
+                            print(f"Warning: Line {i} does not have enough columns")
+        except Exception as e:
+            print(f"Error reading CSV file: {e}")
+            raise
+
         print("Appending Finished")
+        print(f"Found {len(tokens)} tokens and {len(bio_labels)} labels")
         elapsed_time = time.time() - start_time
         print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
         for st in strings:
             self.write_file(file_name, st, tokens, bio_labels)
+        
         print("Writing Finished")
         elapsed_time = time.time() - start_time
         print(f"Elapsed time: {elapsed_time:.2f} seconds")
