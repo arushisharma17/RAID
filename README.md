@@ -5,7 +5,7 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
 1. Labels of different granularities: tokens, phrases, blocks, other semantic chunks.
 2. Corresponding activations for tokens, phrases, blocks.
 4. B-I-0 Labelling for higher-level semantic concepts (Phrase and Block level chunks)
-5. Activation aggregation for higher-level semantic concepts (Phrase and Block level chunks): YOu can generate activations once and experiment with different granularities by aggregatingt the activations.
+5. Activation aggregation for higher-level semantic concepts (Phrase and Block level chunks): You can generate activations once and experiment with different granularities by aggregating the activations.
 6. Integration with static analysis tools to create custom labels
    a. Tree-sitter parsers (Abstract Syntax Tree based labels) - Syntactic
    b. CK metrics (Object Oriented metrics/Design patterns) - Structural
@@ -13,12 +13,16 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
    d. SE datasets, Ontologies, Design Patterns - Semantic
    e. Regular Expressions to create datasets, filter datasets, edit datasets.
 
-## Temp Installation Instructions
+## Installation Instructions
 
-Install RAID from TestPyPI, and its NeuroX dependency:
+Install RAID and its dependencies:
 
 ```bash
-pip install -i https://test.pypi.org/simple/ raid==1.0.0
+pip install raid-tool
+```
+
+Note: If you encounter any issues with NeuroX, you can install it separately:
+```bash
 pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7
 ```
 
@@ -29,25 +33,36 @@ Run RAID on a Java file:
 ```bash
 raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
 ```
-   
 
-## How to Run
-In terminal, run the following command:
-```
-python raid_pipeline.py [filepath to code file] [model] [device] [binary filter] [output prefix] [aggregation method] [label]
-```
-An example input:
-```
-python raid_pipeline.py C:/Users/User/OneDrive/Desktop/SD/RAID/input/sample_input.java --model bert-base-uncased --device cpu --binary_filter 'set:public,static' --output_prefix output --aggregation_method mean --label class_body
-```
-Allowed commands for --label are: program, class_declaration, class_body, method_declaration, formal_parameters, block, method_invocation, leaves
+### Output Directory
+By default, RAID creates an 'output' directory in your current working directory. You can specify a custom output prefix:
 
-## Link to Colab notebook for tutorial and intial instructions
+```bash
+raid path/to/your/file.java --output_prefix custom/path/output
+```
 
+### Available Labels
+The following labels are supported for the `--label` parameter:
+- program
+- class_declaration 
+- class_body
+- method_declaration
+- formal_parameters
+- block
+- method_invocation
+- leaves
+
+### Aggregation Methods
+Available methods for `--aggregation_method`:
+- mean (default)
+- max
+- sum
+- concat
+
+## Link to Colab notebook for tutorial and initial instructions
 https://colab.research.google.com/drive/1MfTbOMrZnQ_FkC65CCJyUE4v21u5pJ4G?usp=sharing
 
-Note: Please keep updating readme as you add code. 
-
+Note: Please keep updating readme as you add code.
 
 [![RAID-Workflow](https://github.com/user-attachments/assets/fdf16639-70f5-4f7e-b20b-762a5cdcaaba)](https://docs.google.com/drawings/d/1LEqqQ_1dJ7MWrBR_2kRZF71bF8Sv6TiDTebAvaGkFX0/edit?usp=sharing)
 
@@ -64,3 +79,4 @@ Note: Please keep updating readme as you add code.
 10. Hierarchical Properties/Structural Properties
 11. Add support for autoencoders NeuroX
 12. Train, validation, test splits for probing tasks support.
+
