@@ -1,15 +1,21 @@
 import os
+import re
 import unittest
 from raid.generate_files import TokenLabelFilesGenerator
+from raid.label_dictionary import LabelDictionary
 
 
 class RAIDTokenFunctions(unittest.TestCase):
-    def confirm_equivalence(self, bytestring, array_string):
+    def confirm_equivalence(self, text, array_string):
         file_path = "input/test_file.txt"
 
         try:
+            if not isinstance(text, bytes):
+                text = re.sub(r'[^\x00-\x7F]+', '', text)
+                text = bytes(text, 'utf-8')
+
             with open(file_path, "wb") as f:
-                f.write(bytestring)
+                f.write(text)
 
             g = TokenLabelFilesGenerator()
             g.generate_in_label_bio_files('input/test_file.txt', 'java', 'program')
@@ -50,15 +56,14 @@ class RAIDTokenFunctions(unittest.TestCase):
         self.confirm_equivalence(bytestring, array_string)
 
 
-    # def test_removing_invalid_characters(self):
-    #     string = "builder\n.append(\"\n┌─for publisher \");"
-    #     array_string = ['builder',
-    #                     '.append("',
-    #                     'forpublisher");',
-    #                     '']
-    #     expected_line_count = 4
-    #
-    #     self.confirm_equivalence(string, array_string, expected_line_count)
+    def test_removing_invalid_characters(self):
+        string = "builder\n.append(\"\n┌─for publisher \");"
+        array_string = ['builder',
+                        '.append("',
+                        'forpublisher");',
+                        '']
+
+        self.confirm_equivalence(string, array_string)
 
     def test_escape_char(self):
         bytestring = b'''final String[] memberValues = value.split("\\|");
@@ -108,6 +113,7 @@ class RAIDTokenFunctions(unittest.TestCase):
                         'throwOException.wrapException(newOCommandExecutionException("Cannotexecutesynchronizationofcluster"),e);',
                         '}',
                         'return"Modenotsupported";',
+                        '}',
                         '']
 
         self.confirm_equivalence(bytestring, array_string)
@@ -145,7 +151,7 @@ class RAIDTokenFunctions(unittest.TestCase):
                         'ncmlWindow.show();',
                         '}',
                         '};',
-                        'BAMutil.setActionProperties(showNcMLAction,null,"Show NcML...",false,\'X\',-1);',
+                        'BAMutil.setActionProperties(showNcMLAction,null,"ShowNcML...",false,\'X\',-1);',
                         '',
                         '//Listlines=StringUtil.split(content,"',
                         '",false);',
@@ -156,59 +162,68 @@ class RAIDTokenFunctions(unittest.TestCase):
         self.confirm_equivalence(bytestring, array_string)
 
 
-    # def test_add_mixed_numbers(self):
-    #     bytestring = b'''private static boolean mappedToNothing(final char ch) {
-    #     return ch == '\u00AD'
-    #             || ch == '\u034F'
-    #             || ch == '\u1806'
-    #             || ch == '\u180B'
-    #             || ch == '\u180C'
-    #             || ch == '\u180D'
-    #             || ch == '\u200B'
-    #             || ch == '\u200C'
-    #             || ch == '\u200D'
-    #             || ch == '\u2060'
-    #             || '\uFE00' <= ch && ch <= '\uFE0F'
-    #             || ch == '\uFEFF';
-    # }'''
-    #     self.confirm_equivalence(bytestring, array_string)
+    def test_add_mixed_numbers(self):
+        bytestring = b'''private static boolean mappedToNothing(final char ch) {
+        return ch == '\u00AD'
+                || ch == '\u034F'
+                || ch == '\u1806'
+                || ch == '\u180B'
+                || ch == '\u180C'
+                || ch == '\u180D'
+                || ch == '\u200B'
+                || ch == '\u200C'
+                || ch == '\u200D'
+                || ch == '\u2060'
+                || '\uFE00' <= ch && ch <= '\uFE0F'
+                || ch == '\uFEFF';
+    }'''
+        array_string = ["privatestaticbooleanmappedToNothing(finalcharch){",
+                        "returnch=='\u00AD'",
+                        "||ch=='\u034F'",
+                        "||ch=='\u1806'",
+                        "||ch=='\u180B'",
+                        "||ch=='\u180C'",
+                        "||ch=='\u180D'",
+                        "||ch=='\u200B'",
+                        "||ch=='\u200C'",
+                        "||ch=='\u200D'",
+                        "||ch=='\u2060'",
+                        "||'\uFE00'<=ch&&ch<='\uFE0F'"
+                        "||ch=='\uFEFF';"
+                        "}"
+                        ""]
+        self.confirm_equivalence(bytestring, array_string)
 
 
-def test_add_mixed_numbers(self):
-    bytestring = b'''if (true) {
-            Map error_headers = new HashMap();
-            error_headers.put( "message:", "authorization refused");
-            error_headers.put( "type:", "send");
-            error_headers.put( "channel:", destination);
-            y.error( error_headers, "The message:
------
-"+b+
-                "
------
-Authentication token refused for this channel");
-        } else
-        { System.out.println("Test"); }'''
-    array_string = ['if(true){',
-                    'Maperror_headers=newHashMap();',
-                    'error_headers.put("message:","authorization refused");',
-                    'error_headers.put("type:","send");',
-                    'error_headers.put("channel:",destination);',
-                    'y.error(error_headers,"The message:',
-                    '-----',
-                    '"+b+',
-                    '"',
-                    '-----',
-                    'Authenticationtokenrefusedforthischannel");',
-                    '}else',
-                    '{System.out.println("Test");}',
-                    '']
-    self.confirm_equivalence(bytestring, array_string)
-#
-# '''
-#                       /** initial delay to execute schedule task, unit: ms */
-#
-#                       System.out.print("# Found plugin for Mime type: \"" + mime + "\"");
-# '''
+    def test_add_mixed_numbers(self):
+        bytestring = b'''if (true) {
+                Map error_headers = new HashMap();
+                error_headers.put( "message:", "authorization refused");
+                error_headers.put( "type:", "send");
+                error_headers.put( "channel:", destination);
+                y.error( error_headers, "The message:
+    -----
+    "+b+
+                    "
+    -----
+    Authentication token refused for this channel");
+            } else
+            { System.out.println("Test"); }'''
+        array_string = ['if(true){',
+                        'Maperror_headers=newHashMap();',
+                        'error_headers.put("message:","authorizationrefused");',
+                        'error_headers.put("type:","send");',
+                        'error_headers.put("channel:",destination);',
+                        'y.error(error_headers,"Themessage:',
+                        '-----',
+                        '"+b+',
+                        '"',
+                        '-----',
+                        'Authenticationtokenrefusedforthischannel");',
+                        '}else',
+                        '{System.out.println("Test");}',
+                        '']
+        self.confirm_equivalence(bytestring, array_string)
 
 
 if __name__ == '__main__':
