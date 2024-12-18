@@ -9,6 +9,7 @@ import json
 
 from .label_dictionary import LabelDictionary
 
+
 class PatternExtractor:
 
     def __init__(self):
@@ -22,8 +23,6 @@ class PatternExtractor:
             'prefix': '^(get|set)[A-Za-z]+$',
             'numeric': '^[a-zA-Z].+[0-9]+$',
         }
-
-
 
 
     def check_token(self, token, regex):
@@ -276,13 +275,7 @@ class PatternExtractor:
 
         data = {
             'TOKEN': [
-                # re.sub(r'\x00', r'\\u0000',
-                #        re.sub(r'\n?([^\x00-\x7F]+)\n?', '', node.text.decode('raw_unicode_escape').strip()))
-                # for node in leaf_nodes
-
                 self.regex_conversion(node.text) for node in leaf_nodes
-
-                # self.unicode_escape_preserve_case(node.text) for node in leaf_nodes
             ],
             'REGEX': [self.find_label_with_regex(str(node.text)[2:-1]) for node in leaf_nodes]
         }
@@ -291,34 +284,22 @@ class PatternExtractor:
             bio = self.search_for_type(non_leaf_type, leaf_nodes, label_dictionary)
             data[non_leaf_type.upper()] = bio
 
+        data['TOKEN'] = [
+            re.sub(r'\\\\u', r'\\u',
+                   re.sub(r'\\\\([nrt"\'])', r'\\\1', token))
+            for token in data['TOKEN']
+        ]
+
+        # Fix any residual issues with slashes
+        data['TOKEN'] = [
+            re.sub(r'\\\\\\(?=\S)', 'FILL_WITH_ONE_SLASH', token).replace('FILL_WITH_ONE_SLASH', '\\\\')
+            if 'FILL_WITH_ONE_SLASH' in token else re.sub(r'\\\\\\(?=\S)', '\\\\', token)
+            for token in data['TOKEN']
+        ]
+
         df = pd.DataFrame(data)
-        # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        #     print(df)
-        # print('\n')
 
         df.to_csv(file_name + '.csv', index=False, escapechar='\\')
-
-        with open(file_name + '.csv', mode='r') as file:
-            csv_file = csv.reader(file)
-            lines = []
-            for line in csv_file:
-                line[0] = line[0].replace('\\\\u', '\\u')
-                # line[0] = re.sub(r'\\(u)\b', r'\1', line[0])
-                # line[0] = re.sub(r'\\\\("|\'|)\b', r'\1', line[0])
-                sub_re = re.sub(r'\\\\([nrt"\'])', r'\\\1', line[0])
-                fl = sub_re != line[0]
-                line[0] = sub_re
-                if fl:
-                    line[0] = re.sub(r'\\\\\\(?=\S)', 'FILL_WITH_ONE_SLASH', line[0])
-                    line[0] = line[0].replace('FILL_WITH_ONE_SLASH', '\\\\')
-                else:
-                    line[0] = re.sub(r'\\\\\\(?=\S)', '\\\\', line[0])
-                lines.append(line)
-
-        # Write updated lines back to the CSV file
-        with open(file_name + '.csv', mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(lines)
 
 
 # def main():
