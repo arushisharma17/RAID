@@ -1,2 +1,0 @@
-[console_scripts]
-raid = raid.raid_pipeline:main
