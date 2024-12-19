@@ -57,59 +57,118 @@ class TestJavaASTProcessor(unittest.TestCase):
 
 class TestActivationAnnotator(unittest.TestCase):
     def setUp(self):
-        self.test_dir = tempfile.mkdtemp()
         self.annotator = ActivationAnnotator(
             model_name="bert-base-uncased",
-            binary_filter="set:public,static"
+            device="cpu",
+            binary_filter="re:^(if|while|for)$",
+            output_prefix="test",
+            aggregation_method="mean"
         )
+        self.test_dir = tempfile.mkdtemp()
 
     def tearDown(self):
         # Clean up temporary files
-        for file in os.listdir(self.test_dir):
-            os.remove(os.path.join(self.test_dir, file))
-        os.rmdir(self.test_dir)
+        import shutil
+        shutil.rmtree(self.test_dir)
 
-    def test_handle_binary_filter_set(self):
-        """Test binary filter handling with set"""
-        self.annotator.handle_binary_filter()
-        self.assertEqual(self.annotator.binary_filter_compiled, {"public", "static"})
+    def test_parse_activations(self):
+        # Create sample activation file
+        activation_file = os.path.join(self.test_dir, "test_activations.json")
+        sample_data = {
+            "tokens": ["if", "condition", "{", "statement", "}"],
+            "activations": [
+                [[0, [0.1, 0.2]], [1, [0.3, 0.4]]],  # Layer activations for first token
+                [[0, [0.5, 0.6]], [1, [0.7, 0.8]]],  # Layer activations for second token
+                [[0, [0.9, 1.0]], [1, [1.1, 1.2]]],
+                [[0, [1.3, 1.4]], [1, [1.5, 1.6]]],
+                [[0, [1.7, 1.8]], [1, [1.9, 2.0]]]
+            ]
+        }
+        with open(activation_file, 'w') as f:
+            json.dump(sample_data, f)
 
-    def test_handle_binary_filter_regex(self):
-        """Test binary filter handling with regex"""
-        self.annotator.binary_filter = "re:public|static"
-        self.annotator.handle_binary_filter()
-        self.assertTrue(self.annotator.binary_filter_compiled.match("public"))
-        self.assertTrue(self.annotator.binary_filter_compiled.match("static"))
-        self.assertFalse(self.annotator.binary_filter_compiled.match("private"))
+        tokens, activations = self.annotator.parse_activations(activation_file)
+        
+        self.assertEqual(len(tokens), 5)
+        self.assertEqual(len(activations), 5)
+        self.assertEqual(tokens[0], "if")
+        self.assertEqual(len(activations[0]), 2)  # Two layers
 
     def test_aggregate_activation_list(self):
-        """Test activation aggregation methods"""
-        test_activations = [np.array([1.0, 2.0]), np.array([3.0, 4.0])]
-        
-        # Test mean aggregation
-        mean_result = self.annotator.aggregate_activation_list(test_activations, method='mean')
-        np.testing.assert_array_equal(mean_result, np.array([2.0, 3.0]))
-        
-        # Test max aggregation
-        max_result = self.annotator.aggregate_activation_list(test_activations, method='max')
-        np.testing.assert_array_equal(max_result, np.array([3.0, 4.0]))
+        # Test different aggregation methods
+        activations = [
+            (0, np.array([0.1, 0.2])),
+            (1, np.array([0.3, 0.4]))
+        ]
 
-    @patch('neurox.data.extraction.transformers_extractor.extract_representations')
-    def test_generate_activations(self, mock_extract):
-        """Test activation generation"""
-        input_file = os.path.join(self.test_dir, "input.txt")
-        output_file = os.path.join(self.test_dir, "output.json")
+        # Test mean aggregation
+        self.annotator.aggregation_method = "mean"
+        result = self.annotator.aggregate_activation_list(activations)
+        expected_mean = np.array([0.2, 0.3])  # Mean of [0.1, 0.3] and [0.2, 0.4]
+        np.testing.assert_array_almost_equal(result, expected_mean)
+
+        # Test max aggregation
+        self.annotator.aggregation_method = "max"
+        result = self.annotator.aggregate_activation_list(activations)
+        expected_max = np.array([0.3, 0.4])  # Max of [0.1, 0.3] and [0.2, 0.4]
+        np.testing.assert_array_almost_equal(result, expected_max)
+
+    def test_handle_binary_filter(self):
+        # Test regex filter
+        tokens_with_depth = [
+            ("if", 1),
+            ("while", 2),
+            ("for", 1),
+            ("else", 2),
+            ("print", 3)
+        ]
         
-        self.annotator.generate_activations(input_file, output_file)
-        
-        mock_extract.assert_called_once_with(
-            "bert-base-uncased",
-            input_file,
-            output_file,
-            aggregation="average",
-            output_type="json",
-            device="cpu"
+        binary_labels = self.annotator.handle_binary_filter(tokens_with_depth)
+        expected = [1, 1, 1, 0, 0]  # if, while, for match the regex, others don't
+        self.assertEqual(binary_labels, expected)
+
+        # Test set filter
+        self.annotator.binary_filter = "set:if,while"
+        binary_labels = self.annotator.handle_binary_filter(tokens_with_depth)
+        expected = [1, 1, 0, 0, 0]  # Only if and while match the set
+        self.assertEqual(binary_labels, expected)
+
+    def test_write_aggregated_activations(self):
+        tokens_with_depth = [("if", 1), ("condition", 2)]
+        activations = [
+            [(0, np.array([0.1, 0.2])), (1, np.array([0.3, 0.4]))],
+            [(0, np.array([0.5, 0.6])), (1, np.array([0.7, 0.8]))]
+        ]
+
+        self.annotator.write_aggregated_activations(
+            tokens_with_depth, 
+            activations,
+            self.test_dir
         )
+
+        output_file = os.path.join(self.test_dir, f"{self.annotator.output_prefix}_aggregated.json")
+        self.assertTrue(os.path.exists(output_file))
+
+        with open(output_file) as f:
+            data = json.load(f)
+            self.assertIn("tokens", data)
+            self.assertIn("depths", data)
+            self.assertIn("activations", data)
+            self.assertEqual(len(data["tokens"]), 2)
+
+    def test_invalid_aggregation_method(self):
+        self.annotator.aggregation_method = "invalid"
+        activations = [(0, np.array([0.1, 0.2]))]
+        
+        with self.assertRaises(ValueError):
+            self.annotator.aggregate_activation_list(activations)
+
+    def test_invalid_binary_filter(self):
+        tokens_with_depth = [("if", 1)]
+        self.annotator.binary_filter = "invalid:pattern"
+        
+        with self.assertRaises(ValueError):
+            self.annotator.handle_binary_filter(tokens_with_depth)
 
 if __name__ == '__main__':
     unittest.main()
