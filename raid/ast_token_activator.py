@@ -177,29 +177,43 @@ class ActivationAnnotator:
         self.layer = layer
 
     def process_activations(self, tokens_tuples: List[Tuple[str, str, int]], 
-                          output_dir: str) -> None:
+                            output_dir: str) -> None:
         """
         Process token activations through the complete pipeline.
         
         Args:
             tokens_tuples: List of (token_type, token_text, depth) tuples
             output_dir: Directory for output files
-            
-        Raises:
-            ValueError: If binary_filter format is invalid
-            IOError: If unable to write to output directory
         """
         input_file = os.path.join(output_dir, 'input_sentences.txt')
-        output_file = os.path.join(output_dir, 'activations.json')
+        
+        # Determine the output file name for activations
+        # If a layer is specified and we are decomposing layers, NeuroX names the file as `activations_layer_{layer}.json`
+        # Otherwise, it remains `activations.json`.
+        if self.layer is not None:
+            # We'll use decomposed layers if layer is specified (as per the original logic)
+            # Hence, the file name will be 'activations_layer_{layer}.json'
+            output_file = os.path.join(output_dir, f'activations_layer_{self.layer}.json')
+        else:
+            # No layer specified, so all layers are extracted into one file named 'activations.json'
+            output_file = os.path.join(output_dir, 'activations.json')
+
         self.generate_activations(input_file, output_file)
         extracted_tokens, activations = self.parse_activations(output_file)
         self.handle_binary_filter()
+        
+        # Tokens with depth information
         tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
+        
+        # Annotate and write data
         self.annotate_data(tokens_with_depth, activations, output_dir)
         self.write_aggregated_activations(tokens_with_depth, activations, output_dir)
+
+        # Aggregate phrase-level activations and write them
         phrase_activations = self.aggregate_phrase_activations(
             tokens_with_depth, activations, method=self.aggregation_method)
         self.write_phrase_activations(phrase_activations, output_dir)
+
 
     def generate_activations(self, input_file: str, output_file: str) -> None:
         """
