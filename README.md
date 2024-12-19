@@ -18,12 +18,8 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
 Install RAID and its dependencies:
 
 ```bash
-pip install raid-tool
-```
-
-Note: If you encounter any issues with NeuroX, you can install it separately:
-```bash
 pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7
+pip install raid-tool
 ```
 
 ### Usage
@@ -31,15 +27,25 @@ pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f9
 Run RAID on a Java file:
 
 ```bash
-raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
+raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body 
 ```
+#### Required Arguments:
+- `input_file`: Path to the Java source file to analyze
 
-### Output Directory
-By default, RAID creates an 'output' directory in your current working directory. You can specify a custom output prefix:
-
-```bash
-raid path/to/your/file.java --output_prefix custom/path/output
-```
+#### Optional Arguments:
+- `--model`: Transformer model to use (default: 'bert-base-uncased')
+- `--device`: Computing device to use ('cpu' or 'cuda', default: 'cpu')
+- `--binary_filter`: Filter for token labeling
+  - Format: "type:pattern"
+  - Types: 
+    - `set`: Comma-separated list (e.g., "set:public,static")
+    - `re`: Regular expression pattern
+- `--output_prefix`: Prefix for output files (default: 'output')
+- `--aggregation_method`: Method to aggregate activations
+  - Options: mean, max, sum, concat (default: mean)
+- `--label`: Type of AST label to analyze
+  - Options: program, class_declaration, class_body, method_declaration, etc.
+- `--layer`: Specific transformer layer to analyze (0-12, default: all layers)
 
 ### Available Labels
 The following labels are supported for the `--label` parameter:
@@ -52,19 +58,12 @@ The following labels are supported for the `--label` parameter:
 - method_invocation
 - leaves
 
-### Aggregation Methods
-Available methods for `--aggregation_method`:
-- mean (default)
-- max
-- sum
-- concat
-
 ## Link to Colab notebook for tutorial and initial instructions
 https://colab.research.google.com/drive/1MfTbOMrZnQ_FkC65CCJyUE4v21u5pJ4G?usp=sharing
 
 Note: Please keep updating readme as you add code.
 
-[![RAID-Workflow](https://github.com/user-attachments/assets/fdf16639-70f5-4f7e-b20b-762a5cdcaaba)](https://docs.google.com/drawings/d/1LEqqQ_1dJ7MWrBR_2kRZF71bF8Sv6TiDTebAvaGkFX0/edit?usp=sharing)
+[![RAID-Workflow](https://colab.research.google.com/drive/165SuE7ZWAAfUBcTuH6dVlQqoMFSL7ja-)](https://docs.google.com/drawings/d/1LEqqQ_1dJ7MWrBR_2kRZF71bF8Sv6TiDTebAvaGkFX0/edit?usp=sharing)
 
 ## Features
 1. Integrate static analysis tools. 
@@ -79,4 +78,3 @@ Note: Please keep updating readme as you add code.
 10. Hierarchical Properties/Structural Properties
 11. Add support for autoencoders NeuroX
 12. Train, validation, test splits for probing tasks support.
-

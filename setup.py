@@ -5,14 +5,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="raid-tool",
-    version="3.1.3",
-    author="Arushi Sharma, Hrishikesha Kyathsandra, Zeynep Oghan",
+    version="5.1.0",
+    author="Hrishikesha Kyathsandra, Zeynep Oghan, Arushi Sharma",
     author_email="hk.hrishi30@gmail.com",
     description="RAID: Rapid Automated Interpretability Datasets tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/arushisharma17/RAID",
-    packages=find_packages(include=['raid', 'raid.*']),  # Only include raid package
+    packages=find_packages(include=['raid', 'raid.*']),  
     install_requires=[
         "asttokens==2.4.1",
         "attrs==24.2.0",

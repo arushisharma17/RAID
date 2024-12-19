@@ -51,143 +51,126 @@ class TokenLabelFilesGenerator:
         prev = 0
         token_index = 0
         token_str = ''
-        tokens_len = len(tokens)  # Get total length of tokens
-        
-        with (open(file_name + '.in', 'a') as file_in, 
-              open(file_name + '.label', 'a') as file_labels,
+        token_iter = iter(tokens)
+        cut_to_next_line = True
+
+        with (open(file_name + '.in', 'a') as file_in, open(file_name + '.label', 'a') as file_labels,
               open(file_name + '.bio', 'w') as file_bio):
-            
             lines = string.split('\n')
-            for i, line in enumerate(lines):
-                if len(line.strip()) == 0:  # if line is blank, add newline and skip
+            line_enum = iter(lines)
+            # enumerate through a line of the file
+            for i, line in enumerate(line_enum):
+                if len(line.strip()) == 0:
                     file_in.write('\n')
                     file_labels.write('\n')
-                    file_bio.write('\n')
+                    file_labels.write('\n')
                     continue
-                    
-                # Handle multiline comments
-                if line.lstrip()[:2] == '/*' and prev < token_index + 1 and token_index < tokens_len:
+                # if multiline comment
+                elif line.lstrip()[:2] == '/*' and len(tokens[prev:token_index+1]) > 0:
                     file_in.write(' '.join(tokens[prev:token_index+1]).strip() + '\n')
                     file_labels.write(' '.join(label[2:] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
                     file_bio.write(' '.join(label[0] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
                     token_str = ''
+                    for it in range(''.join(tokens[prev:token_index+1]).count('\n')):
+                        next(line_enum)
                     prev = token_index + 1
                     token_index += 1
+                    next(token_iter)
                     continue
 
-                line = line.replace(" ", "")  # don't worry about spaces
-                cut_to_next_line = True
-                
-                # Process tokens for this line
-                while token_index < tokens_len and abs(prev - token_index) < 500:  # Add bounds check
-                    current_token = tokens[token_index]
-                    stripped_token = current_token.replace(" ", "")
-                    
-                    # Handle escaped characters
-                    if stripped_token.startswith('\\\\') and len(stripped_token) > 2:
-                        stripped_token = stripped_token.replace('\\\\', '\\')
-                        
-                    token_str += stripped_token
+                line = line.replace(" ", "")
+
+                while abs(prev - token_index < 500):  # temp condition
+                    t = next(token_iter)
+                    token_index += 1
+                    stripped_t = t.replace(" ", "")
+
+                    if stripped_t.startswith('\\\\') and len(stripped_t) > 2:
+                        stripped_t = stripped_t.replace('\\\\', '\\')
+
+                    token_str += stripped_t
                     test_token_str = token_str.replace('\\', '').strip()
                     test_line = line.replace('\\', '').strip().replace('\t', '')
-                    
-                    t_count = current_token.count('\n')
-                    if t_count > 0:  # if token is multiline
-                        cut_to_next_line = line in current_token or line == token_str[:token_str.find('\n')]
+                    t_count = t.count('\n')
+
+                    if t_count > 0:
+                        for it in range(t_count-1):
+                            next(line_enum)
+                        cut_to_next_line = line in t or line == token_str[:token_str.find('\n')]
                         break
-                    elif test_line.endswith(test_token_str):  # if the line and token_str are a match
+                    elif test_line.endswith(test_token_str):
                         if not test_line.startswith(test_token_str) or test_line == test_token_str:
                             cut_to_next_line = True
                             break
-                    elif len(test_token_str) > len(test_line):  # if token_str has become longer than the line
+                    elif len(test_token_str) > len(test_line):
                         cut_to_next_line = True
                         break
-                        
-                    token_index += 1
-                    if token_index >= tokens_len:
-                        break
-                
-                # Write accumulated tokens
-                if prev < token_index and prev < tokens_len:
-                    file_in.write(' '.join(tokens[prev:token_index]) + ' ')
-                    file_labels.write(' '.join(label[2:] for label in labels[prev:token_index]) + ' ')
-                    file_bio.write(' '.join(label[0] for label in labels[prev:token_index]) + ' ')
-                
-                if cut_to_next_line:  # Add newlines if needed
+
+                file_in.write(' '.join(tokens[prev:token_index]) + ' ')
+                file_labels.write(' '.join(label[2:] for label in labels[prev:token_index]) + ' ')
+                file_bio.write(' '.join(label[0] for label in labels[prev:token_index]) + ' ')
+
+                if cut_to_next_line:
                     file_in.write('\n')
                     file_labels.write('\n')
-                    file_bio.write('\n')
-                
-                token_str = ''  # Reset for next line
-                prev = token_index  # Update token start position
+                    file_labels.write('\n')
+
+                if token_str.find('\n') > -1 and cut_to_next_line:
+                    next(line_enum)
+
+                token_str = ''
+                prev = token_index
 
 
     def generate_in_label_bio_files(self, source_file, language, label_type):
         """
         Generates .in, .label, and .bio files for the given text file.
+
+        Parameters
+        ----------
+        source_file : str
+            The text file containing elements to be written to the .in and .label files.
+        language : str
+            The language to extra labels in.
+        label_type : str
+            The desired label (non-leaf) to be parsed.
         """
         label_dictionary = LabelDictionary()
-        
-        # Use os.path.join for proper path handling
-        output_dir = os.path.join(os.getcwd(), 'output')
-        base_name = os.path.basename(source_file).split('.')[0]
-        file_name = os.path.join(output_dir, base_name)
-        
+        file_name = 'output/' + os.path.basename(source_file).split('.')[0]
         tokens = []
         bio_labels = []
-
-        # Create output directory if it doesn't exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-        # Initialize files
-        with (open(file_name + '.in', 'w') as file_in, 
-              open(file_name + '.label', 'w') as file_label,
+        with (open(file_name + '.in', 'w') as file_in, open(file_name + '.label', 'w') as file_label,
               open(file_name + '.bio', 'w') as file_bio):
             file_in.write('')
             file_label.write('')
             file_bio.write('')
 
-        strings = self.read_file(source_file)
-        csv_file_path = file_name + '.csv'
 
-        if not os.path.isfile(csv_file_path):
-            print(f"Generating CSV file at {csv_file_path}")
+        strings = self.read_file(source_file)
+
+        if not os.path.isfile(file_name + '.csv'):
+            print("No CSV Found")
             extractor = PatternExtractor()
+            # strings = self.read_file(source_file)
             for st in strings:
                 extractor.get_all_bio_labels(bytes(st, encoding='utf8'), language, file_name)
-        
         print("CSV Finished")
         elapsed_time = time.time() - start_time
         print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
-        try:
-            with open(csv_file_path, mode='r') as file:
-                csv_file = csv.reader(file)
-                iter_csv = iter(csv_file)
-                next(iter_csv)  # Skip header
-                for i, lines in enumerate(iter_csv):
-                    if len(lines) > 0:  # Make sure we have data
-                        tokens.append(lines[0])
-                        label_index = label_dictionary.non_leaf_types.get(label_type)
-                        if label_index is None:
-                            raise ValueError(f"Invalid label type: {label_type}")
-                        if label_index < len(lines):
-                            bio_labels.append(lines[label_index])
-                        else:
-                            print(f"Warning: Line {i} does not have enough columns")
-        except Exception as e:
-            print(f"Error reading CSV file: {e}")
-            raise
-
+        with open(file_name + '.csv', mode='r') as file:
+            csv_file = csv.reader(file)
+            iter_csv = iter(csv_file)
+            next(iter_csv)
+            for i, lines in enumerate(iter_csv):
+                tokens.append(lines[0])
+                bio_labels.append(lines[label_dictionary.non_leaf_types[label_type]])
         print("Appending Finished")
-        print(f"Found {len(tokens)} tokens and {len(bio_labels)} labels")
         elapsed_time = time.time() - start_time
         print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
         for st in strings:
             self.write_file(file_name, st, tokens, bio_labels)
-        
         print("Writing Finished")
         elapsed_time = time.time() - start_time
         print(f"Elapsed time: {elapsed_time:.2f} seconds")
@@ -211,15 +194,13 @@ class TokenLabelFilesGenerator:
         extractor.create_tree_json(bytes(code, encoding='utf8'), language, file_name)
 
 
-# def main():
-#     g = TokenLabelFilesGenerator()
-#     print("Generating In/Label/Bio")
-#     elapsed_time = time.time() - start_time
-#     print(f"Elapsed time: {elapsed_time:.2f} seconds")
-#     g.generate_in_label_bio_files('input/source-code-cleaned.txt', 'java', 'program')
-#     # g.generate_in_label_bio_files('input/for.txt', 'java', 'program')
-#     # g.generate_json_file('input/small-src-chunck1.txt', 'java')
-#
-#
-# if __name__ == "__main__":
-#     main()
+def main():
+    g = TokenLabelFilesGenerator()
+    print("Generating In/Label/Bio")
+    elapsed_time = time.time() - start_time
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    g.generate_in_label_bio_files('../input/source-code-cleaned.txt', 'java', 'program')
+
+
+if __name__ == "__main__":
+    main()

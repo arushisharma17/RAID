@@ -177,29 +177,62 @@ class ActivationAnnotator:
         self.layer = layer
 
     def process_activations(self, tokens_tuples: List[Tuple[str, str, int]], 
-                          output_dir: str) -> None:
+                            output_dir: str) -> None:
         """
         Process token activations through the complete pipeline.
         
         Args:
             tokens_tuples: List of (token_type, token_text, depth) tuples
             output_dir: Directory for output files
-            
-        Raises:
-            ValueError: If binary_filter format is invalid
-            IOError: If unable to write to output directory
         """
         input_file = os.path.join(output_dir, 'input_sentences.txt')
-        output_file = os.path.join(output_dir, 'activations.json')
-        self.generate_activations(input_file, output_file)
+
+        if self.layer is not None:
+            # Primary expected filename
+            primary_output_file = os.path.join(output_dir, f'activations_layer_{self.layer}.json')
+            # Alternate filename observed
+            alternate_output_file = os.path.join(output_dir, f'activations_layer_{self.layer}-layer{self.layer}.json')
+        else:
+            # No layer specified, the standard filename is activations.json
+            primary_output_file = os.path.join(output_dir, 'activations.json')
+            alternate_output_file = None
+
+        # Generate activations
+        self.generate_activations(input_file, primary_output_file)
+
+        # Check for the primary file
+        if self.layer is not None and not os.path.exists(primary_output_file):
+            # If primary file not found and we have a layer, try the alternate filename
+            if alternate_output_file and os.path.exists(alternate_output_file):
+                output_file = alternate_output_file
+            else:
+                # Neither primary nor alternate found
+                raise FileNotFoundError(
+                    f"Expected activation file not found. Checked:\n"
+                    f" - {primary_output_file}\n"
+                    f"{f' - {alternate_output_file}\\n' if alternate_output_file else ''}"
+                    f"Please verify that NeuroX generated the expected files."
+                )
+        else:
+            # If no layer is specified or the primary file was found, use primary_output_file
+            output_file = primary_output_file
+
+        # Parse and process the activations
         extracted_tokens, activations = self.parse_activations(output_file)
         self.handle_binary_filter()
+
+        # Tokens with depth information
         tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
+
+        # Annotate and write data
         self.annotate_data(tokens_with_depth, activations, output_dir)
         self.write_aggregated_activations(tokens_with_depth, activations, output_dir)
+
+        # Aggregate phrase-level activations and write them
         phrase_activations = self.aggregate_phrase_activations(
             tokens_with_depth, activations, method=self.aggregation_method)
         self.write_phrase_activations(phrase_activations, output_dir)
+
 
     def generate_activations(self, input_file: str, output_file: str) -> None:
         """
@@ -219,19 +252,22 @@ class ActivationAnnotator:
             "device": self.device
         }
         
-        # Add layer-specific arguments if a layer is specified
+        # If a specific layer is requested, we decompose layers and filter to that single layer.
+        # This will produce a single file named activations_layer_{layer}.json
         if self.layer is not None:
             extract_args.update({
                 "decompose_layers": True,
                 "filter_layers": str(self.layer)
             })
-            
+        # If no layer is specified, we do not decompose by layer, producing a single activations.json file.
+        
         transformers_extractor.extract_representations(
             self.model_name,
             input_file,
             output_file,
             **extract_args
         )
+
 
     def parse_activations(self, activation_file: str) -> Tuple[List[str], List[List[Tuple[int, np.ndarray]]]]:
         """

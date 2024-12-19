@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
 Name: raid-tool
-Version: 3.1.3
+Version: 5.1.0
 Summary: RAID: Rapid Automated Interpretability Datasets tool
 Home-page: https://github.com/arushisharma17/RAID
-Author: Arushi Sharma, Hrishikesha Kyathsandra, Zeynep Oghan
+Author: Hrishikesha Kyathsandra, Zeynep Oghan, Arushi Sharma
 Author-email: hk.hrishi30@gmail.com
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
@@ -116,7 +116,7 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
 1. Labels of different granularities: tokens, phrases, blocks, other semantic chunks.
 2. Corresponding activations for tokens, phrases, blocks.
 4. B-I-0 Labelling for higher-level semantic concepts (Phrase and Block level chunks)
-5. Activation aggregation for higher-level semantic concepts (Phrase and Block level chunks): YOu can generate activations once and experiment with different granularities by aggregatingt the activations.
+5. Activation aggregation for higher-level semantic concepts (Phrase and Block level chunks): You can generate activations once and experiment with different granularities by aggregating the activations.
 6. Integration with static analysis tools to create custom labels
    a. Tree-sitter parsers (Abstract Syntax Tree based labels) - Syntactic
    b. CK metrics (Object Oriented metrics/Design patterns) - Structural
@@ -124,13 +124,13 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
    d. SE datasets, Ontologies, Design Patterns - Semantic
    e. Regular Expressions to create datasets, filter datasets, edit datasets.
 
-## Temp Installation Instructions
+## Installation Instructions
 
-Install RAID from TestPyPI, and its NeuroX dependency:
+Install RAID and its dependencies:
 
 ```bash
-pip install -i https://test.pypi.org/simple/ raid==1.0.0
 pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7
+pip install raid-tool
 ```
 
 ### Usage
@@ -138,29 +138,43 @@ pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f9
 Run RAID on a Java file:
 
 ```bash
-raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
+raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body 
 ```
-   
+#### Required Arguments:
+- `input_file`: Path to the Java source file to analyze
 
-## How to Run
-In terminal, run the following command:
-```
-python raid_pipeline.py [filepath to code file] [model] [device] [binary filter] [output prefix] [aggregation method] [label]
-```
-An example input:
-```
-python raid_pipeline.py C:/Users/User/OneDrive/Desktop/SD/RAID/input/sample_input.java --model bert-base-uncased --device cpu --binary_filter 'set:public,static' --output_prefix output --aggregation_method mean --label class_body
-```
-Allowed commands for --label are: program, class_declaration, class_body, method_declaration, formal_parameters, block, method_invocation, leaves
+#### Optional Arguments:
+- `--model`: Transformer model to use (default: 'bert-base-uncased')
+- `--device`: Computing device to use ('cpu' or 'cuda', default: 'cpu')
+- `--binary_filter`: Filter for token labeling
+  - Format: "type:pattern"
+  - Types: 
+    - `set`: Comma-separated list (e.g., "set:public,static")
+    - `re`: Regular expression pattern
+- `--output_prefix`: Prefix for output files (default: 'output')
+- `--aggregation_method`: Method to aggregate activations
+  - Options: mean, max, sum, concat (default: mean)
+- `--label`: Type of AST label to analyze
+  - Options: program, class_declaration, class_body, method_declaration, etc.
+- `--layer`: Specific transformer layer to analyze (0-12, default: all layers)
 
-## Link to Colab notebook for tutorial and intial instructions
+### Available Labels
+The following labels are supported for the `--label` parameter:
+- program
+- class_declaration 
+- class_body
+- method_declaration
+- formal_parameters
+- block
+- method_invocation
+- leaves
 
+## Link to Colab notebook for tutorial and initial instructions
 https://colab.research.google.com/drive/1MfTbOMrZnQ_FkC65CCJyUE4v21u5pJ4G?usp=sharing
 
-Note: Please keep updating readme as you add code. 
+Note: Please keep updating readme as you add code.
 
-
-[![RAID-Workflow](https://github.com/user-attachments/assets/fdf16639-70f5-4f7e-b20b-762a5cdcaaba)](https://docs.google.com/drawings/d/1LEqqQ_1dJ7MWrBR_2kRZF71bF8Sv6TiDTebAvaGkFX0/edit?usp=sharing)
+[![RAID-Workflow](https://colab.research.google.com/drive/165SuE7ZWAAfUBcTuH6dVlQqoMFSL7ja-)](https://docs.google.com/drawings/d/1LEqqQ_1dJ7MWrBR_2kRZF71bF8Sv6TiDTebAvaGkFX0/edit?usp=sharing)
 
 ## Features
 1. Integrate static analysis tools. 
