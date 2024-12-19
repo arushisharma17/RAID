@@ -30,12 +30,6 @@ Run RAID on a Java file:
 raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
 ```
 
-### Output Directory
-By default, RAID creates an 'output' directory in your current working directory. You can specify a custom output prefix:
-
-```bash
-raid path/to/your/file.java --output_prefix custom/path/output
-```
 
 ### Available Labels
 The following labels are supported for the `--label` parameter:
