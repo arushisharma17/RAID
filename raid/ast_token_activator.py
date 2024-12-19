@@ -187,23 +187,35 @@ class ActivationAnnotator:
         """
         input_file = os.path.join(output_dir, 'input_sentences.txt')
 
-        # If a specific layer is requested, NeuroX (with decompose_layers=True and filter_layers)
-        # will produce exactly one file: activations_layer_{layer}.json
-        # If no layer is requested, we get a single activations.json file with all layers.
         if self.layer is not None:
-            output_file = os.path.join(output_dir, f'activations_layer_{self.layer}.json')
+            # Primary expected filename
+            primary_output_file = os.path.join(output_dir, f'activations_layer_{self.layer}.json')
+            # Alternate filename observed
+            alternate_output_file = os.path.join(output_dir, f'activations_layer_{self.layer}-layer{self.layer}.json')
         else:
-            output_file = os.path.join(output_dir, 'activations.json')
+            # No layer specified, the standard filename is activations.json
+            primary_output_file = os.path.join(output_dir, 'activations.json')
+            alternate_output_file = None
 
         # Generate activations
-        self.generate_activations(input_file, output_file)
+        self.generate_activations(input_file, primary_output_file)
 
-        # Confirm the file was created
-        if not os.path.exists(output_file):
-            raise FileNotFoundError(
-                f"Expected activation file not found at: {output_file}\n"
-                f"Please verify that NeuroX generated the expected files."
-            )
+        # Check for the primary file
+        if self.layer is not None and not os.path.exists(primary_output_file):
+            # If primary file not found and we have a layer, try the alternate filename
+            if alternate_output_file and os.path.exists(alternate_output_file):
+                output_file = alternate_output_file
+            else:
+                # Neither primary nor alternate found
+                raise FileNotFoundError(
+                    f"Expected activation file not found. Checked:\n"
+                    f" - {primary_output_file}\n"
+                    f"{f' - {alternate_output_file}\\n' if alternate_output_file else ''}"
+                    f"Please verify that NeuroX generated the expected files."
+                )
+        else:
+            # If no layer is specified or the primary file was found, use primary_output_file
+            output_file = primary_output_file
 
         # Parse and process the activations
         extracted_tokens, activations = self.parse_activations(output_file)
