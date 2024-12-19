@@ -64,7 +64,7 @@ https://colab.research.google.com/drive/1MfTbOMrZnQ_FkC65CCJyUE4v21u5pJ4G?usp=sh
 
 Note: Please keep updating readme as you add code.
 
-[![RAID-Workflow](https://github.com/user-attachments/assets/fdf16639-70f5-4f7e-b20b-762a5cdcaaba)](https://docs.google.com/drawings/d/1LEqqQ_1dJ7MWrBR_2kRZF71bF8Sv6TiDTebAvaGkFX0/edit?usp=sharing)
+[![RAID-Workflow](https://colab.research.google.com/drive/165SuE7ZWAAfUBcTuH6dVlQqoMFSL7ja-)](https://docs.google.com/drawings/d/1LEqqQ_1dJ7MWrBR_2kRZF71bF8Sv6TiDTebAvaGkFX0/edit?usp=sharing)
 
 ## Features
 1. Integrate static analysis tools. 
