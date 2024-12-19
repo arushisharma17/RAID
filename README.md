@@ -27,8 +27,27 @@ pip install raid-tool
 Run RAID on a Java file:
 
 ```bash
-raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body 
+raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
 ```
+
+#### Required Arguments:
+- `input_file`: Path to the Java source file to analyze
+
+#### Optional Arguments:
+- `--model`: Transformer model to use (default: 'bert-base-uncased')
+- `--device`: Computing device to use ('cpu' or 'cuda', default: 'cpu')
+- `--binary_filter`: Filter for token labeling
+  - Format: "type:pattern"
+  - Types: 
+    - `set`: Comma-separated list (e.g., "set:public,static")
+    - `re`: Regular expression pattern
+- `--output_prefix`: Prefix for output files (default: 'output')
+- `--aggregation_method`: Method to aggregate activations
+  - Options: mean, max, sum, concat (default: mean)
+- `--label`: Type of AST label to analyze
+  - Options: program, class_declaration, class_body, method_declaration, etc.
+- `--layer`: Specific transformer layer to analyze (0-12, default: all layers)
+- `--help`: Show help message explaining the arguments.
 
 
 ### Available Labels
@@ -42,12 +61,6 @@ The following labels are supported for the `--label` parameter:
 - method_invocation
 - leaves
 
-### Aggregation Methods
-Available methods for `--aggregation_method`:
-- mean (default)
-- max
-- sum
-- concat
 
 ## Link to Colab notebook for tutorial and initial instructions
 https://colab.research.google.com/drive/1MfTbOMrZnQ_FkC65CCJyUE4v21u5pJ4G?usp=sharing
