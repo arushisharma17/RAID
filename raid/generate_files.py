@@ -66,7 +66,7 @@ class TokenLabelFilesGenerator:
                     file_labels.write('\n')
                     continue
                 # if multiline comment
-                elif line.lstrip()[:2] == '/*' and len(tokens[prev:token_index+1]) > 0:
+                elif (line.lstrip()[:2] == '/*' or line.lstrip()[:3] == "'''" or line.lstrip()[:3] == '"""') and len(tokens[prev:token_index+1]) > 0:
                     file_in.write(' '.join(tokens[prev:token_index+1]).strip() + '\n')
                     file_labels.write(' '.join(label[2:] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
                     file_bio.write(' '.join(label[0] for label in labels[prev:token_index+1]).replace(' ', '') + '\n')
