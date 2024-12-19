@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>ast_token_activator API documentation</title>
+<meta name="description" content="Java AST Processing and Neural Activation Analysis Tools …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ast_token_activator</code></h1>
+</header>
+<section id="section-intro">
+<p>Java AST Processing and Neural Activation Analysis Tools</p>
+<p>This module provides tools for processing Java Abstract Syntax Trees (AST) and analyzing neural network
+activations for code understanding tasks. It includes two main classes: JavaASTProcessor for AST
+manipulation and ActivationAnnotator for neural activation analysis.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ast_token_activator.ActivationAnnotator"><code class="flex name class">
+<span>class <span class="ident">ActivationAnnotator</span></span>
+<span>(</span><span>model_name: str, device: str = 'cpu', binary_filter: str = 'set:public,static', output_prefix: str = 'output', aggregation_method: str = 'mean')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate and analyze neural network activations for code tokens.</p>
+<p>This class handles the generation of neural network activations for tokens,
+applies filtering, and provides various analysis methods.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the transformer model to use</dd>
+<dt><strong><code>device</code></strong> :&ensp;<code>str</code></dt>
+<dd>Computing device ('cpu' or 'cuda')</dd>
+<dt><strong><code>binary_filter</code></strong> :&ensp;<code>str</code></dt>
+<dd>Filter specification for binary classification</dd>
+<dt><strong><code>output_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Prefix for output files</dd>
+<dt><strong><code>binary_filter_compiled</code></strong> :&ensp;<code>Union[Pattern, set]</code></dt>
+<dd>Compiled filter</dd>
+<dt><strong><code>aggregation_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>Method for aggregating activations</dd>
+</dl>
+<p>Initialize the ActivationAnnotator.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_name</code></strong></dt>
+<dd>Name of the transformer model</dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>Computing device ('cpu' or 'cuda')</dd>
+<dt><strong><code>binary_filter</code></strong></dt>
+<dd>Filter specification (starts with 're:' for regex or 'set:' for word set)</dd>
+<dt><strong><code>output_prefix</code></strong></dt>
+<dd>Prefix for output files</dd>
+<dt><strong><code>aggregation_method</code></strong></dt>
+<dd>Method for aggregating activations ('mean', 'max', 'sum', 'concat')</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ActivationAnnotator:
+    &#34;&#34;&#34;
+    Generate and analyze neural network activations for code tokens.
+    
+    This class handles the generation of neural network activations for tokens,
+    applies filtering, and provides various analysis methods.
+    
+    Attributes:
+        model_name (str): Name of the transformer model to use
+        device (str): Computing device (&#39;cpu&#39; or &#39;cuda&#39;)
+        binary_filter (str): Filter specification for binary classification
+        output_prefix (str): Prefix for output files
+        binary_filter_compiled (Union[Pattern, set]): Compiled filter
+        aggregation_method (str): Method for aggregating activations
+    &#34;&#34;&#34;
+
+    def __init__(self, model_name: str, device: str = &#39;cpu&#39;, 
+                 binary_filter: str = &#39;set:public,static&#39;, 
+                 output_prefix: str = &#39;output&#39;,
+                 aggregation_method: str = &#39;mean&#39;):
+        &#34;&#34;&#34;
+        Initialize the ActivationAnnotator.
+        
+        Args:
+            model_name: Name of the transformer model
+            device: Computing device (&#39;cpu&#39; or &#39;cuda&#39;)
+            binary_filter: Filter specification (starts with &#39;re:&#39; for regex or &#39;set:&#39; for word set)
+            output_prefix: Prefix for output files
+            aggregation_method: Method for aggregating activations (&#39;mean&#39;, &#39;max&#39;, &#39;sum&#39;, &#39;concat&#39;)
+        &#34;&#34;&#34;
+        self.model_name = model_name
+        self.device = device
+        self.binary_filter = binary_filter
+        self.output_prefix = output_prefix
+        self.binary_filter_compiled = None
+        self.aggregation_method = aggregation_method
+
+    def process_activations(self, tokens_tuples: List[Tuple[str, str, int]], 
+                          output_dir: str) -&gt; None:
+        &#34;&#34;&#34;
+        Process token activations through the complete pipeline.
+        
+        Args:
+            tokens_tuples: List of (token_type, token_text, depth) tuples
+            output_dir: Directory for output files
+            
+        Raises:
+            ValueError: If binary_filter format is invalid
+            IOError: If unable to write to output directory
+        &#34;&#34;&#34;
+        input_file = os.path.join(output_dir, &#39;input_sentences.txt&#39;)
+        output_file = os.path.join(output_dir, &#39;activations.json&#39;)
+        self.generate_activations(input_file, output_file)
+        extracted_tokens, activations = self.parse_activations(output_file)
+        self.handle_binary_filter()
+        tokens_with_depth = [(t, d) for (_, t, d) in tokens_tuples]
+        self.annotate_data(tokens_with_depth, activations, output_dir)
+        self.write_aggregated_activations(tokens_with_depth, activations, output_dir)
+        phrase_activations = self.aggregate_phrase_activations(
+            tokens_with_depth, activations, method=self.aggregation_method)
+        self.write_phrase_activations(phrase_activations, output_dir)
+
+    def generate_activations(self, input_file: str, output_file: str) -&gt; None:
+        &#34;&#34;&#34;
+        Generate neural network activations using the specified transformer model.
+        
+        Args:
+            input_file: Path to input file containing tokens
+            output_file: Path where activations will be saved
+            
+        Raises:
+            FileNotFoundError: If input file doesn&#39;t exist
+            RuntimeError: If model fails to generate activations
+        &#34;&#34;&#34;
+        transformers_extractor.extract_representations(
+            self.model_name,
+            input_file,
+            output_file,
+            aggregation=&#34;average&#34;,  
+            output_type=&#34;json&#34;,
+            device=self.device
+        )
+
+    def parse_activations(self, activation_file: str) -&gt; Tuple[List[str], List[List[Tuple[int, np.ndarray]]]]:
+        &#34;&#34;&#34;
+        Parse activations from the JSON output file.
+        
+        Args:
+            activation_file: Path to the activation JSON file
+            
+        Returns:
+            Tuple containing:
+                - List of extracted tokens
+                - List of activations per token (each activation is a list of layer tuples)
+                
+        Raises:
+            FileNotFoundError: If activation file doesn&#39;t exist
+            JSONDecodeError: If activation file is not valid JSON
+        &#34;&#34;&#34;
+        with open(activation_file, &#39;r&#39;, encoding=&#39;utf-8&#39;) as f:
+            activation_data = json.load(f)
+        activations = []
+        extracted_tokens = []
+        for feature in activation_data[&#39;features&#39;]:
+            token = feature[&#39;token&#39;].replace(&#39;Ġ&#39;, &#39;&#39;)
+            layers = feature[&#39;layers&#39;]
+            token_activations = []
+            for layer in layers:
+                layer_index = layer[&#39;index&#39;]
+                layer_values = layer[&#39;values&#39;]
+                token_activations.append((layer_index, np.array(layer_values)))
+            activations.append(token_activations)
+            extracted_tokens.append(token)
+        return extracted_tokens, activations
+
+    def handle_binary_filter(self) -&gt; None:
+        &#34;&#34;&#34;
+        Compile the binary filter based on user input.
+        
+        The filter can be either a regex pattern (prefixed with &#39;re:&#39;)
+        or a set of words (prefixed with &#39;set:&#39;).
+        
+        Raises:
+            NotImplementedError: If filter prefix is neither &#39;re:&#39; nor &#39;set:&#39;
+            re.error: If regex pattern is invalid
+        &#34;&#34;&#34;
+        if self.binary_filter.startswith(&#34;re:&#34;):
+            self.binary_filter_compiled = re.compile(self.binary_filter[3:])
+        elif self.binary_filter.startswith(&#34;set:&#34;):
+            self.binary_filter_compiled = set(self.binary_filter[4:].split(&#34;,&#34;))
+        else:
+            raise NotImplementedError(&#34;Filter must start with &#39;re:&#39; for regex or &#39;set:&#39; for a set of words.&#34;)
+
+    def annotate_data(self, tokens_with_depth: List[Tuple[str, int]], 
+                     activations: List[List[Tuple[int, np.ndarray]]], 
+                     output_dir: str) -&gt; None:
+        &#34;&#34;&#34;
+        Create binary data and save tokens and labels organized by AST depth.
+        
+        Args:
+            tokens_with_depth: List of (token, depth) tuples
+            activations: List of activations for each token
+            output_dir: Directory to save output files
+            
+        Raises:
+            IOError: If unable to write to output directory
+        &#34;&#34;&#34;
+        tokens_depths, labels, flat_activations = self._create_binary_data(
+            tokens_with_depth, activations, self.binary_filter_compiled, balance_data=False
+        )
+
+        from collections import defaultdict
+        depth_to_tokens = defaultdict(list)
+        depth_to_labels = defaultdict(list)
+
+        for (token, depth), label in zip(tokens_depths, labels):
+            depth_to_tokens[depth].append(token)
+            depth_to_labels[depth].append(label)
+
+        max_depth = max(depth_to_tokens.keys())
+
+        words_file = os.path.join(output_dir, f&#34;{self.output_prefix}_tokens.txt&#34;)
+        labels_file = os.path.join(output_dir, f&#34;{self.output_prefix}_labels.txt&#34;)
+        activations_file = os.path.join(output_dir, f&#34;{self.output_prefix}_activations.txt&#34;)
+
+        with open(words_file, &#34;w&#34;, encoding=&#39;utf-8&#39;) as f_words, \
+             open(labels_file, &#34;w&#34;, encoding=&#39;utf-8&#39;) as f_labels:
+            for depth in range(max_depth + 1):
+                tokens_line = &#39; &#39;.join(depth_to_tokens.get(depth, []))
+                labels_line = &#39; &#39;.join(depth_to_labels.get(depth, []))
+                f_words.write(tokens_line + &#39;\n&#39;)
+                f_labels.write(labels_line + &#39;\n&#39;)
+
+        with open(activations_file, &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
+            for token_activations in flat_activations:
+                last_layer_activation = token_activations[-1][1].tolist()
+                activation_str = &#39; &#39;.join(map(str, last_layer_activation))
+                f.write(activation_str + &#39;\n&#39;)
+
+    def _create_binary_data(self, tokens_with_depth: List[Tuple[str, int]], 
+                          activations: List[List[Tuple[int, np.ndarray]]], 
+                          binary_filter: Union[Pattern, set], 
+                          balance_data: bool = False) -&gt; Tuple[List[Tuple[str, int]], List[str], List[List[Tuple[int, np.ndarray]]]]:
+        &#34;&#34;&#34;
+        Create binary labeled dataset based on the binary_filter.
+        
+        Args:
+            tokens_with_depth: List of (token, depth) tuples
+            activations: List of activations for each token
+            binary_filter: Compiled regex pattern or set of words
+            balance_data: Whether to balance positive and negative samples
+            
+        Returns:
+            Tuple containing:
+                - List of (word, depth) tuples
+                - List of labels (&#39;positive&#39; or &#39;negative&#39;)
+                - List of token activations
+                
+        Raises:
+            NotImplementedError: If binary_filter is not a set, regex pattern, or callable
+        &#34;&#34;&#34;
+        if isinstance(binary_filter, set):
+            filter_fn = lambda x: x in binary_filter
+        elif isinstance(binary_filter, Pattern):
+            filter_fn = lambda x: binary_filter.match(x)
+        elif callable(binary_filter):
+            filter_fn = binary_filter
+        else:
+            raise NotImplementedError(&#34;The binary_filter must be a set, a regex pattern, or a callable function.&#34;)
+
+        words = []
+        depths = []
+        labels = []
+        final_activations = []
+
+        for (token, depth), token_activations in zip(tokens_with_depth, activations):
+            words.append(token)
+            depths.append(depth)
+            if filter_fn(token):
+                labels.append(&#39;positive&#39;)
+            else:
+                labels.append(&#39;negative&#39;)
+            final_activations.append(token_activations)
+
+        return list(zip(words, depths)), labels, final_activations
+
+    def aggregate_activation_list(self, activations: List[np.ndarray], 
+                                method: str = &#39;mean&#39;) -&gt; np.ndarray:
+        &#34;&#34;&#34;
+        Aggregate a list of activations using the specified method.
+        
+        Args:
+            activations: List of activation arrays to aggregate
+            method: Aggregation method (&#39;mean&#39;, &#39;max&#39;, &#39;sum&#39;, or &#39;concat&#39;)
+            
+        Returns:
+            numpy.ndarray: Aggregated activation array
+            
+        Raises:
+            ValueError: If unsupported aggregation method is specified
+        &#34;&#34;&#34;
+        activations_array = np.stack(activations)
+        if method == &#39;mean&#39;:
+            return np.mean(activations_array, axis=0)
+        elif method == &#39;max&#39;:
+            return np.max(activations_array, axis=0)
+        elif method == &#39;sum&#39;:
+            return np.sum(activations_array, axis=0)
+        elif method == &#39;concat&#39;:
+            return np.concatenate(activations_array, axis=0)
+        else:
+            raise ValueError(&#34;Unsupported aggregation method&#34;)
+
+    def aggregate_phrase_activations(self, tokens_with_depth: List[Tuple[str, int]],
+                                   activations: List[List[Tuple[int, np.ndarray]]], 
+                                   method: str = &#39;mean&#39;) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Aggregate token-level activations into phrase-level activations.
+        
+        Phrases are defined as tokens at the same depth level in the AST.
+        
+        Args:
+            tokens_with_depth: List of (token, depth) tuples
+            activations: List of activation layers for each token
+            method: Aggregation method (&#39;mean&#39;, &#39;max&#39;, &#39;sum&#39;, or &#39;concat&#39;)
+            
+        Returns:
+            Dict containing:
+                - linex_index: Index of the line
+                - features: List of phrase features with their aggregated activations
+                
+        Raises:
+            ValueError: If unsupported aggregation method is specified
+        &#34;&#34;&#34;
+        from collections import defaultdict
+
+        depth_to_tokens = defaultdict(list)
+        depth_to_activations = defaultdict(list)
+        
+        for (token, depth), token_layers in zip(tokens_with_depth, activations):
+            depth_to_tokens[depth].append(token)
+            depth_to_activations[depth].append(token_layers)
+
+        phrase_activations = []
+        for depth in sorted(depth_to_tokens.keys()):
+            tokens = depth_to_tokens[depth]
+            tokens_layers_list = depth_to_activations[depth]
+
+            layer_to_activations = defaultdict(list)
+            for token_layers in tokens_layers_list:
+                for layer_index, activation in token_layers:
+                    layer_to_activations[layer_index].append(activation)
+
+            aggregated_layers = []
+            for layer_index in sorted(layer_to_activations.keys()):
+                activations_list = layer_to_activations[layer_index]
+                aggregated_activation = self.aggregate_activation_list(activations_list, method=method)
+                aggregated_layers.append({
+                    &#34;index&#34;: layer_index,
+                    &#34;values&#34;: aggregated_activation.tolist()
+                })
+
+            phrase_key = &#39; &#39;.join(tokens)
+            phrase_feature = {
+                &#34;phrase&#34;: phrase_key,
+                &#34;layers&#34;: aggregated_layers
+            }
+            phrase_activations.append(phrase_feature)
+
+        output_data = {
+            &#34;linex_index&#34;: 0,
+            &#34;features&#34;: phrase_activations
+        }
+
+        return output_data
+
+    def write_phrase_activations(self, phrase_activations: Dict[str, Any], 
+                               output_dir: str) -&gt; None:
+        &#34;&#34;&#34;
+        Write phrase activations to a JSON file.
+        
+        Args:
+            phrase_activations: Dictionary containing phrase activation data
+            output_dir: Directory to save the output file
+            
+        Raises:
+            IOError: If unable to write to output directory
+            TypeError: If phrase_activations is not JSON-serializable
+        &#34;&#34;&#34;
+        mapping_file = os.path.join(output_dir, f&#34;{self.output_prefix}_phrasal_activations.json&#34;)
+        with open(mapping_file, &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
+            json.dump(phrase_activations, f, indent=2)
+        print(f&#34;Phrase activations saved to &#39;{mapping_file}&#39;.&#34;)
+
+    def write_aggregated_activations(self, tokens_with_depth: List[Tuple[str, int]], 
+                                   activations: List[List[Tuple[int, np.ndarray]]], 
+                                   output_dir: str) -&gt; None:
+        &#34;&#34;&#34;
+        Write mean-aggregated activations across all layers to a JSON file.
+        
+        Args:
+            tokens_with_depth: List of (token, depth) tuples
+            activations: List of activation layers for each token
+            output_dir: Directory to save the output file
+            
+        Raises:
+            IOError: If unable to write to output directory
+            ValueError: If token and activation lengths don&#39;t match
+        &#34;&#34;&#34;
+        aggregated_file = os.path.join(output_dir, f&#34;{self.output_prefix}_aggregated_activations.json&#34;)
+        
+        token_activations = []
+        
+        for (token, _), token_layers in zip(tokens_with_depth, activations):
+            layer_activations = [layer[1] for layer in token_layers]
+            aggregated = self.aggregate_activation_list(layer_activations, method=self.aggregation_method)
+            
+            token_feature = {
+                &#34;token&#34;: token,
+                &#34;aggregated_values&#34;: aggregated.tolist()
+            }
+            token_activations.append(token_feature)
+        
+        output_data = {
+            &#34;aggregation_method&#34;: self.aggregation_method,
+            &#34;features&#34;: token_activations
+        }
+        
+        with open(aggregated_file, &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
+            json.dump(output_data, f, indent=2)
+        
+        print(f&#34;Aggregated activations saved to &#39;{aggregated_file}&#39;.&#34;)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="ast_token_activator.ActivationAnnotator.aggregate_activation_list"><code class="name flex">
+<span>def <span class="ident">aggregate_activation_list</span></span>(<span>self, activations: List[numpy.ndarray], method: str = 'mean') ‑> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Aggregate a list of activations using the specified method.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>activations</code></strong></dt>
+<dd>List of activation arrays to aggregate</dd>
+<dt><strong><code>method</code></strong></dt>
+<dd>Aggregation method ('mean', 'max', 'sum', or 'concat')</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>numpy.ndarray</code></dt>
+<dd>Aggregated activation array</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If unsupported aggregation method is specified</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.aggregate_phrase_activations"><code class="name flex">
+<span>def <span class="ident">aggregate_phrase_activations</span></span>(<span>self, tokens_with_depth: List[Tuple[str, int]], activations: List[List[Tuple[int, numpy.ndarray]]], method: str = 'mean') ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Aggregate token-level activations into phrase-level activations.</p>
+<p>Phrases are defined as tokens at the same depth level in the AST.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tokens_with_depth</code></strong></dt>
+<dd>List of (token, depth) tuples</dd>
+<dt><strong><code>activations</code></strong></dt>
+<dd>List of activation layers for each token</dd>
+<dt><strong><code>method</code></strong></dt>
+<dd>Aggregation method ('mean', 'max', 'sum', or 'concat')</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Dict containing:
+- linex_index: Index of the line
+- features: List of phrase features with their aggregated activations</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If unsupported aggregation method is specified</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.annotate_data"><code class="name flex">
+<span>def <span class="ident">annotate_data</span></span>(<span>self, tokens_with_depth: List[Tuple[str, int]], activations: List[List[Tuple[int, numpy.ndarray]]], output_dir: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create binary data and save tokens and labels organized by AST depth.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tokens_with_depth</code></strong></dt>
+<dd>List of (token, depth) tuples</dd>
+<dt><strong><code>activations</code></strong></dt>
+<dd>List of activations for each token</dd>
+<dt><strong><code>output_dir</code></strong></dt>
+<dd>Directory to save output files</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>IOError</code></dt>
+<dd>If unable to write to output directory</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.generate_activations"><code class="name flex">
+<span>def <span class="ident">generate_activations</span></span>(<span>self, input_file: str, output_file: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate neural network activations using the specified transformer model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>input_file</code></strong></dt>
+<dd>Path to input file containing tokens</dd>
+<dt><strong><code>output_file</code></strong></dt>
+<dd>Path where activations will be saved</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>FileNotFoundError</code></dt>
+<dd>If input file doesn't exist</dd>
+<dt><code>RuntimeError</code></dt>
+<dd>If model fails to generate activations</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.handle_binary_filter"><code class="name flex">
+<span>def <span class="ident">handle_binary_filter</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compile the binary filter based on user input.</p>
+<p>The filter can be either a regex pattern (prefixed with 're:')
+or a set of words (prefixed with 'set:').</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>If filter prefix is neither 're:' nor 'set:'</dd>
+<dt><code>re.error</code></dt>
+<dd>If regex pattern is invalid</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.parse_activations"><code class="name flex">
+<span>def <span class="ident">parse_activations</span></span>(<span>self, activation_file: str) ‑> Tuple[List[str], List[List[Tuple[int, numpy.ndarray]]]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse activations from the JSON output file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>activation_file</code></strong></dt>
+<dd>Path to the activation JSON file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Tuple containing:
+- List of extracted tokens
+- List of activations per token (each activation is a list of layer tuples)</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>FileNotFoundError</code></dt>
+<dd>If activation file doesn't exist</dd>
+<dt><code>JSONDecodeError</code></dt>
+<dd>If activation file is not valid JSON</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.process_activations"><code class="name flex">
+<span>def <span class="ident">process_activations</span></span>(<span>self, tokens_tuples: List[Tuple[str, str, int]], output_dir: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process token activations through the complete pipeline.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tokens_tuples</code></strong></dt>
+<dd>List of (token_type, token_text, depth) tuples</dd>
+<dt><strong><code>output_dir</code></strong></dt>
+<dd>Directory for output files</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If binary_filter format is invalid</dd>
+<dt><code>IOError</code></dt>
+<dd>If unable to write to output directory</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.write_aggregated_activations"><code class="name flex">
+<span>def <span class="ident">write_aggregated_activations</span></span>(<span>self, tokens_with_depth: List[Tuple[str, int]], activations: List[List[Tuple[int, numpy.ndarray]]], output_dir: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Write mean-aggregated activations across all layers to a JSON file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tokens_with_depth</code></strong></dt>
+<dd>List of (token, depth) tuples</dd>
+<dt><strong><code>activations</code></strong></dt>
+<dd>List of activation layers for each token</dd>
+<dt><strong><code>output_dir</code></strong></dt>
+<dd>Directory to save the output file</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>IOError</code></dt>
+<dd>If unable to write to output directory</dd>
+<dt><code>ValueError</code></dt>
+<dd>If token and activation lengths don't match</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.ActivationAnnotator.write_phrase_activations"><code class="name flex">
+<span>def <span class="ident">write_phrase_activations</span></span>(<span>self, phrase_activations: Dict[str, Any], output_dir: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Write phrase activations to a JSON file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>phrase_activations</code></strong></dt>
+<dd>Dictionary containing phrase activation data</dd>
+<dt><strong><code>output_dir</code></strong></dt>
+<dd>Directory to save the output file</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>IOError</code></dt>
+<dd>If unable to write to output directory</dd>
+<dt><code>TypeError</code></dt>
+<dd>If phrase_activations is not JSON-serializable</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="ast_token_activator.JavaASTProcessor"><code class="flex name class">
+<span>class <span class="ident">JavaASTProcessor</span></span>
+<span>(</span><span>java_file_path: str, output_dir: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process Java source code to extract Abstract Syntax Tree (AST) information.</p>
+<p>This class handles parsing Java source files, extracting tokens from the AST,
+and optionally visualizing the tree structure.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>java_file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to the Java source file</dd>
+<dt><strong><code>output_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>Directory where output files will be saved</dd>
+<dt><strong><code>source_code</code></strong> :&ensp;<code>str</code></dt>
+<dd>Content of the Java source file</dd>
+<dt><strong><code>tree</code></strong> :&ensp;<code>tree_sitter.Tree</code></dt>
+<dd>Parsed AST</dd>
+<dt><strong><code>root_node</code></strong> :&ensp;<code>tree_sitter.Node</code></dt>
+<dd>Root node of the AST</dd>
+<dt><strong><code>tokens_tuples</code></strong> :&ensp;<code>List[Tuple[str, str, int]]</code></dt>
+<dd>List of (token_type, token_text, depth) tuples</dd>
+<dt><strong><code>tokens</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>List of extracted token texts</dd>
+<dt><strong><code>parser</code></strong> :&ensp;<code>tree_sitter.Parser</code></dt>
+<dd>Tree-sitter parser instance</dd>
+</dl>
+<p>Initialize the JavaASTProcessor with file path and output directory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>java_file_path</code></strong></dt>
+<dd>Path to the Java source file</dd>
+<dt><strong><code>output_dir</code></strong></dt>
+<dd>Directory where output files will be saved</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class JavaASTProcessor:
+    &#34;&#34;&#34;
+    Process Java source code to extract Abstract Syntax Tree (AST) information.
+    
+    This class handles parsing Java source files, extracting tokens from the AST,
+    and optionally visualizing the tree structure.
+    
+    Attributes:
+        java_file_path (str): Path to the Java source file
+        output_dir (str): Directory where output files will be saved
+        source_code (str): Content of the Java source file
+        tree (tree_sitter.Tree): Parsed AST
+        root_node (tree_sitter.Node): Root node of the AST
+        tokens_tuples (List[Tuple[str, str, int]]): List of (token_type, token_text, depth) tuples
+        tokens (List[str]): List of extracted token texts
+        parser (tree_sitter.Parser): Tree-sitter parser instance
+    &#34;&#34;&#34;
+
+    def __init__(self, java_file_path: str, output_dir: str):
+        &#34;&#34;&#34;
+        Initialize the JavaASTProcessor with file path and output directory.
+        
+        Args:
+            java_file_path: Path to the Java source file
+            output_dir: Directory where output files will be saved
+        &#34;&#34;&#34;
+        self.java_file_path = java_file_path
+        self.output_dir = output_dir
+        self.source_code = None
+        self.tree = None
+        self.root_node = None
+        self.tokens_tuples = None
+        self.tokens = None
+        self.parser = Parser(JAVA_LANGUAGE)
+
+    def process_ast(self) -&gt; None:
+        &#34;&#34;&#34;
+        Process the Java source file to extract AST information.
+        
+        This method performs the complete processing pipeline:
+        1. Reads the source code
+        2. Parses it into an AST
+        3. Extracts tokens
+        4. Writes tokens to output file
+        &#34;&#34;&#34;
+        self.read_source_code()
+        self.parse_source_code()
+        self.tokens_tuples = self.extract_leaf_tokens()
+        self.tokens = [token_text for _, token_text, _ in self.tokens_tuples]
+        self.write_tokens_to_file()
+
+    def read_source_code(self) -&gt; None:
+        &#34;&#34;&#34;
+        Read and store the Java source code from the file.
+        
+        Raises:
+            FileNotFoundError: If the Java file doesn&#39;t exist
+            UnicodeDecodeError: If the file encoding is not UTF-8
+        &#34;&#34;&#34;
+        with open(self.java_file_path, &#39;r&#39;, encoding=&#39;utf-8&#39;) as file:
+            self.source_code = file.read()
+
+    def parse_source_code(self) -&gt; None:
+        &#34;&#34;&#34;
+        Parse the source code into an AST using tree-sitter.
+        
+        The parsed tree is stored in self.tree and the root node in self.root_node.
+        &#34;&#34;&#34;
+        self.tree = self.parser.parse(self.source_code.encode(&#39;utf-8&#39;))
+        self.root_node = self.tree.root_node
+
+    def extract_leaf_tokens(self, node=None, depth: int = 0) -&gt; List[Tuple[str, str, int]]:
+        &#34;&#34;&#34;
+        Recursively extract tokens from AST leaf nodes.
+        
+        Args:
+            node: Current AST node (defaults to root node if None)
+            depth: Current depth in the AST
+            
+        Returns:
+            List of tuples containing (token_type, token_text, depth)
+        &#34;&#34;&#34;
+        if node is None:
+            node = self.root_node
+        tokens = []
+        if len(node.children) == 0:
+            tokens.append((node.type, node.text.decode(&#39;utf-8&#39;), depth))
+        else:
+            for child in node.children:
+                tokens.extend(self.extract_leaf_tokens(child, depth + 1))
+        return tokens
+
+    def write_tokens_to_file(self) -&gt; None:
+        &#34;&#34;&#34;
+        Write extracted tokens to a file in the output directory.
+        
+        Creates &#39;input_sentences.txt&#39; in the output directory and prints token information
+        to the console.
+        
+        Raises:
+            IOError: If unable to write to the output directory
+        &#34;&#34;&#34;
+        input_file = os.path.join(self.output_dir, &#39;input_sentences.txt&#39;)
+        with open(input_file, &#39;w&#39;, encoding=&#39;utf-8&#39;) as f:
+            f.write(&#39; &#39;.join(self.tokens) + &#39;\n&#39;)
+        print(f&#34;Tokens written to &#39;{input_file}&#39;.&#34;)
+        print(&#34;Extracted Tokens:&#34;)
+        for token_type, token_text, depth in self.tokens_tuples:
+            print(f&#34;Type: {token_type}, Text: {token_text}, Depth: {depth}&#34;)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="ast_token_activator.JavaASTProcessor.extract_leaf_tokens"><code class="name flex">
+<span>def <span class="ident">extract_leaf_tokens</span></span>(<span>self, node=None, depth: int = 0) ‑> List[Tuple[str, str, int]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Recursively extract tokens from AST leaf nodes.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>node</code></strong></dt>
+<dd>Current AST node (defaults to root node if None)</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Current depth in the AST</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List of tuples containing (token_type, token_text, depth)</p></div>
+</dd>
+<dt id="ast_token_activator.JavaASTProcessor.parse_source_code"><code class="name flex">
+<span>def <span class="ident">parse_source_code</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse the source code into an AST using tree-sitter.</p>
+<p>The parsed tree is stored in self.tree and the root node in self.root_node.</p></div>
+</dd>
+<dt id="ast_token_activator.JavaASTProcessor.process_ast"><code class="name flex">
+<span>def <span class="ident">process_ast</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process the Java source file to extract AST information.</p>
+<p>This method performs the complete processing pipeline:
+1. Reads the source code
+2. Parses it into an AST
+3. Extracts tokens
+4. Writes tokens to output file</p></div>
+</dd>
+<dt id="ast_token_activator.JavaASTProcessor.read_source_code"><code class="name flex">
+<span>def <span class="ident">read_source_code</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Read and store the Java source code from the file.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>FileNotFoundError</code></dt>
+<dd>If the Java file doesn't exist</dd>
+<dt><code>UnicodeDecodeError</code></dt>
+<dd>If the file encoding is not UTF-8</dd>
+</dl></div>
+</dd>
+<dt id="ast_token_activator.JavaASTProcessor.write_tokens_to_file"><code class="name flex">
+<span>def <span class="ident">write_tokens_to_file</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Write extracted tokens to a file in the output directory.</p>
+<p>Creates 'input_sentences.txt' in the output directory and prints token information
+to the console.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>IOError</code></dt>
+<dd>If unable to write to the output directory</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ast_token_activator.ActivationAnnotator" href="#ast_token_activator.ActivationAnnotator">ActivationAnnotator</a></code></h4>
+<ul class="">
+<li><code><a title="ast_token_activator.ActivationAnnotator.aggregate_activation_list" href="#ast_token_activator.ActivationAnnotator.aggregate_activation_list">aggregate_activation_list</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.aggregate_phrase_activations" href="#ast_token_activator.ActivationAnnotator.aggregate_phrase_activations">aggregate_phrase_activations</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.annotate_data" href="#ast_token_activator.ActivationAnnotator.annotate_data">annotate_data</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.generate_activations" href="#ast_token_activator.ActivationAnnotator.generate_activations">generate_activations</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.handle_binary_filter" href="#ast_token_activator.ActivationAnnotator.handle_binary_filter">handle_binary_filter</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.parse_activations" href="#ast_token_activator.ActivationAnnotator.parse_activations">parse_activations</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.process_activations" href="#ast_token_activator.ActivationAnnotator.process_activations">process_activations</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.write_aggregated_activations" href="#ast_token_activator.ActivationAnnotator.write_aggregated_activations">write_aggregated_activations</a></code></li>
+<li><code><a title="ast_token_activator.ActivationAnnotator.write_phrase_activations" href="#ast_token_activator.ActivationAnnotator.write_phrase_activations">write_phrase_activations</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="ast_token_activator.JavaASTProcessor" href="#ast_token_activator.JavaASTProcessor">JavaASTProcessor</a></code></h4>
+<ul class="">
+<li><code><a title="ast_token_activator.JavaASTProcessor.extract_leaf_tokens" href="#ast_token_activator.JavaASTProcessor.extract_leaf_tokens">extract_leaf_tokens</a></code></li>
+<li><code><a title="ast_token_activator.JavaASTProcessor.parse_source_code" href="#ast_token_activator.JavaASTProcessor.parse_source_code">parse_source_code</a></code></li>
+<li><code><a title="ast_token_activator.JavaASTProcessor.process_ast" href="#ast_token_activator.JavaASTProcessor.process_ast">process_ast</a></code></li>
+<li><code><a title="ast_token_activator.JavaASTProcessor.read_source_code" href="#ast_token_activator.JavaASTProcessor.read_source_code">read_source_code</a></code></li>
+<li><code><a title="ast_token_activator.JavaASTProcessor.write_tokens_to_file" href="#ast_token_activator.JavaASTProcessor.write_tokens_to_file">write_tokens_to_file</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

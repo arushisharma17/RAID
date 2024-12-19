@@ -10,3 +10,7 @@ htmlcov/
 docs/_build/
 *.log
 .env
+neurox-env
+NeuroX
+input/source-code.java
+**/source-code*

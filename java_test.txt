@@ -1,0 +1,6 @@
+returnBuffer.append(minParam);
+returnBuffer.append(FieldMetaData.Decimal.SQ_CLOSE);
+returnBuffer.append(FieldMetaData.Decimal.MAX);
+returnBuffer.append(maxParam);
+returnBuffer.append(FieldMetaData.Decimal.STEP_FACTOR);
+returnBuffer.append(stepFactorParam);

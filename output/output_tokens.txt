@@ -1,0 +1,10 @@
+
+
+class HelloWorld for ( ; ) addNumbers
+public { } ; i < 10 i ++ { } public int ( ) { }
+void main int i = 0 ; a b return ;
+public static ( ) { } . println , a + b
+args ; System . out ( i )
+String . println
+[ ] System . out ( )
+" Hello, World! "
