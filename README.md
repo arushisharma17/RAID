@@ -27,7 +27,7 @@ pip install raid-tool
 Run RAID on a Java file:
 
 ```bash
-raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
+raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body 
 ```
 
 
