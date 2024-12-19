@@ -4,7 +4,7 @@ class HelloWorld
 public { }
 void main
 public static ( ) { }
-args ;
-String . println
-[ ] System . out ( )
-" Hello, World! "
+args ; ;
+String . println . println
+[ ] System . out ( ) System . out ( )
+" Hello, World! " " Hello, World! "
