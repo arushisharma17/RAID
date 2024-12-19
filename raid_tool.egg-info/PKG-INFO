@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: raid-tool
-Version: 5.0.0
+Version: 4.3.0
 Summary: RAID: Rapid Automated Interpretability Datasets tool
 Home-page: https://github.com/arushisharma17/RAID
 Author: Hrishikesha Kyathsandra, Zeynep Oghan, Arushi Sharma
@@ -138,9 +138,8 @@ pip install raid-tool
 Run RAID on a Java file:
 
 ```bash
-raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body --layer 5
+raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filter "set:public,static" --output_prefix output --aggregation_method mean --label class_body 
 ```
-
 #### Required Arguments:
 - `input_file`: Path to the Java source file to analyze
 
@@ -158,8 +157,6 @@ raid path/to/your/file.java --model bert-base-uncased --device cpu --binary_filt
 - `--label`: Type of AST label to analyze
   - Options: program, class_declaration, class_body, method_declaration, etc.
 - `--layer`: Specific transformer layer to analyze (0-12, default: all layers)
-- `--help`: Show help message explaining the arguments.
-
 
 ### Available Labels
 The following labels are supported for the `--label` parameter:
@@ -171,7 +168,6 @@ The following labels are supported for the `--label` parameter:
 - block
 - method_invocation
 - leaves
-
 
 ## Link to Colab notebook for tutorial and initial instructions
 https://colab.research.google.com/drive/1MfTbOMrZnQ_FkC65CCJyUE4v21u5pJ4G?usp=sharing
