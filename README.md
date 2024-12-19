@@ -18,12 +18,8 @@ Designed to generate binary and multiclass datasets rapidly using regular expres
 Install RAID and its dependencies:
 
 ```bash
-pip install raid-tool
-```
-
-Note: If you encounter any issues with NeuroX, you can install it separately:
-```bash
 pip install git+https://github.com/arushisharma17/NeuroX.git@fe7ab9c2d8eb1b4b3f93de73b8eaae57a6fc67b7
+pip install raid-tool
 ```
 
 ### Usage
