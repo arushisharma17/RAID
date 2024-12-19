@@ -187,9 +187,9 @@ class ActivationAnnotator:
         """
         input_file = os.path.join(output_dir, 'input_sentences.txt')
 
-        # If a layer is specified, NeuroX with `decompose_layers=True` and `filter_layers`
-        # produces a file named `activations_layer_{layer}.json`.
-        # If no layer is specified, it produces `activations.json`.
+        # If a specific layer is requested, NeuroX (with decompose_layers=True and filter_layers)
+        # will produce exactly one file: activations_layer_{layer}.json
+        # If no layer is requested, we get a single activations.json file with all layers.
         if self.layer is not None:
             output_file = os.path.join(output_dir, f'activations_layer_{self.layer}.json')
         else:
@@ -198,7 +198,7 @@ class ActivationAnnotator:
         # Generate activations
         self.generate_activations(input_file, output_file)
 
-        # Check if the output file exists
+        # Confirm the file was created
         if not os.path.exists(output_file):
             raise FileNotFoundError(
                 f"Expected activation file not found at: {output_file}\n"
@@ -222,8 +222,6 @@ class ActivationAnnotator:
         self.write_phrase_activations(phrase_activations, output_dir)
 
 
-
-
     def generate_activations(self, input_file: str, output_file: str) -> None:
         """
         Generate neural network activations using the specified transformer model.
@@ -242,19 +240,22 @@ class ActivationAnnotator:
             "device": self.device
         }
         
-        # Add layer-specific arguments if a layer is specified
+        # If a specific layer is requested, we decompose layers and filter to that single layer.
+        # This will produce a single file named activations_layer_{layer}.json
         if self.layer is not None:
             extract_args.update({
                 "decompose_layers": True,
                 "filter_layers": str(self.layer)
             })
-            
+        # If no layer is specified, we do not decompose by layer, producing a single activations.json file.
+        
         transformers_extractor.extract_representations(
             self.model_name,
             input_file,
             output_file,
             **extract_args
         )
+
 
     def parse_activations(self, activation_file: str) -> Tuple[List[str], List[List[Tuple[int, np.ndarray]]]]:
         """
