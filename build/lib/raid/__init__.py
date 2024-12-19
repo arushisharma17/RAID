@@ -4,5 +4,5 @@ RAID: Rapid Automated Interpretability Datasets tool
 
 from .raid_pipeline import main
 
-__version__ = "3.1.6"
+__version__ = "4.0.0"
 __all__ = ['main']

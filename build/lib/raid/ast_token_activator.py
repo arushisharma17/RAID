@@ -187,32 +187,25 @@ class ActivationAnnotator:
         """
         input_file = os.path.join(output_dir, 'input_sentences.txt')
 
-        # If a specific layer is provided, NeuroX (with decompose_layers=True) may produce a file
-        # named "activations_layer_{layer}-layer{layer}.json".
-        # If no layer is specified, the file is simply "activations.json".
+        # If a layer is specified, NeuroX with `decompose_layers=True` and `filter_layers`
+        # produces a file named `activations_layer_{layer}.json`.
+        # If no layer is specified, it produces `activations.json`.
         if self.layer is not None:
-            # Attempt to match the naming pattern observed:
-            # "activations_layer_{layer}-layer{layer}.json"
-            output_file = os.path.join(output_dir, f'activations_layer_{self.layer}-layer{self.layer}.json')
+            output_file = os.path.join(output_dir, f'activations_layer_{self.layer}.json')
         else:
             output_file = os.path.join(output_dir, 'activations.json')
 
+        # Generate activations
         self.generate_activations(input_file, output_file)
 
-        # After generation, verify if the file exists. If it doesn't and we specified a layer,
-        # try the simpler fallback filename "activations_layer_{layer}.json".
-        if self.layer is not None and not os.path.exists(output_file):
-            fallback_file = os.path.join(output_dir, f'activations_layer_{self.layer}.json')
-            if os.path.exists(fallback_file):
-                output_file = fallback_file
-            else:
-                raise FileNotFoundError(
-                    f"Expected activation file not found. Checked:\n"
-                    f" - {output_file}\n"
-                    f" - {fallback_file}\n"
-                    f"Please verify that NeuroX generated the expected files."
-                )
+        # Check if the output file exists
+        if not os.path.exists(output_file):
+            raise FileNotFoundError(
+                f"Expected activation file not found at: {output_file}\n"
+                f"Please verify that NeuroX generated the expected files."
+            )
 
+        # Parse and process the activations
         extracted_tokens, activations = self.parse_activations(output_file)
         self.handle_binary_filter()
 
@@ -227,6 +220,7 @@ class ActivationAnnotator:
         phrase_activations = self.aggregate_phrase_activations(
             tokens_with_depth, activations, method=self.aggregation_method)
         self.write_phrase_activations(phrase_activations, output_dir)
+
 
 
 
